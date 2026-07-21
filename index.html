@@ -719,10 +719,10 @@
                             <div class="param-row">
                                 <span class="param-label">用电里程占比
                                     <span class="tooltip"><span class="tooltip-icon">?</span>
-                                        <span class="tooltip-text">有家充且通勤短填 70-80%，常跑长途/无充电条件填 30-50%</span>
+                                        <span class="tooltip-text">填 0–100 的整数，如 70 表示 70% 用电。有家充且通勤短填 70–80，常跑长途/无充电条件填 30–50</span>
                                     </span>
                                 </span>
-                                <div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-ev-ratio" value="0" min="0" max="1" step="0.1" oninput="calculate()"><span class="param-unit">%</span></div>
+                                <div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-ev-ratio" value="0" min="0" max="100" step="10" oninput="calculate()"><span class="param-unit">(0-100)</span></div>
                             </div>
                             <div class="param-row">
                                 <span class="param-label">亏电油耗（L/100km）
@@ -814,7 +814,7 @@
                         </div>
                         <div class="param-group">
                             <div class="param-group-title">使用成本</div>
-                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-ratio" value="0" min="0" max="1" step="0.1" oninput="calculateTrade()"><span class="param-unit">%</span></div></div>
+                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-ratio" value="0" min="0" max="100" step="10" oninput="calculateTrade()"><span class="param-unit">(0-100)</span></div></div>
                             <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-oil-consumption" value="7" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
                             <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-oil-price" value="8" step="0.1" oninput="calculateTrade()"><span class="param-unit">元/L</span></div></div>
                             <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
@@ -837,7 +837,7 @@
                         </div>
                         <div class="param-group">
                             <div class="param-group-title">使用成本</div>
-                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-ratio" value="1" min="0" max="1" step="0.1" oninput="calculateTrade()"><span class="param-unit">%</span></div></div>
+                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-ratio" value="100" min="0" max="100" step="10" oninput="calculateTrade()"><span class="param-unit">(0-100)</span></div></div>
                             <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-consumption" value="14" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
                             <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-price" value="0.8" step="0.05" oninput="calculateTrade()"><span class="param-unit">元/度</span></div></div>
                             <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
@@ -965,7 +965,7 @@
                 purchase: +document.getElementById('hybrid-purchase').value || 0,
                 evConsumption: +document.getElementById('hybrid-ev-consumption').value || 0,
                 evPrice: +document.getElementById('hybrid-ev-price').value || 0,
-                evRatio: +document.getElementById('hybrid-ev-ratio').value || 0,
+                evRatio: (+document.getElementById('hybrid-ev-ratio').value || 0) / 100,
                 oilConsumption: +document.getElementById('hybrid-oil-consumption').value || 0,
                 oilPrice: +document.getElementById('hybrid-oil-price').value || 0,
                 mileage: +document.getElementById('hybrid-mileage').value || 0,
@@ -1343,7 +1343,7 @@
                 yearsUsed: +document.getElementById('old-years-used').value || 0,
                 yearsLeft: +document.getElementById('old-years-left').value || 0,
                 residualEnd: +document.getElementById('old-residual-end').value || 0,
-                evRatio: +document.getElementById('old-ev-ratio').value || 0,
+                evRatio: (+document.getElementById('old-ev-ratio').value || 0) / 100,
                 oilConsumption: +document.getElementById('old-oil-consumption').value || 0,
                 oilPrice: +document.getElementById('old-oil-price').value || 0,
                 evConsumption: +document.getElementById('old-ev-consumption').value || 0,
@@ -1360,7 +1360,7 @@
                 purchase: +document.getElementById('new-purchase').value || 0,
                 years: +document.getElementById('new-years').value || 0,
                 residual: +document.getElementById('new-residual').value || 0,
-                evRatio: +document.getElementById('new-ev-ratio').value || 0,
+                evRatio: (+document.getElementById('new-ev-ratio').value || 0) / 100,
                 evConsumption: +document.getElementById('new-ev-consumption').value || 0,
                 evPrice: +document.getElementById('new-ev-price').value || 0,
                 oilConsumption: +document.getElementById('new-oil-consumption').value || 0,
