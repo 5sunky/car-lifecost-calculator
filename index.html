@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汽车使用成本 & 置换测算模型</title>
+    <style>
+        :root {
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+            --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+            --color-bg: #f5f5f7;
+            --color-surface: #ffffff;
+            --color-surface-raised: #fafafa;
+            --color-border: #e5e5e7;
+            --color-border-light: #f0f0f2;
+            --color-text-primary: #1d1d1f;
+            --color-text-secondary: #86868b;
+            --color-text-tertiary: #a1a1a6;
+            --color-text-quaternary: #c7c7cc;
+            --color-accent: #0071e3;
+            --color-accent-light: #e8f4fd;
+            --color-positive: #34c759;
+            --color-positive-light: #e8f5e9;
+            --color-warning: #ff9500;
+            --color-warning-light: #fff3e0;
+            --color-danger: #ff3b30;
+            --color-danger-light: #ffebee;
+            --chart-blue: #0071e3;
+            --chart-red: #ff3b30;
+            --chart-green: #34c759;
+            --chart-purple: #af52de;
+            --chart-gray: #8e8e93;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+            --transition: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-sans);
+            background: var(--color-bg);
+            color: var(--color-text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .header {
+            background: rgba(255,255,255,0.85);
+            border-bottom: 1px solid var(--color-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 32px; height: 32px;
+            background: var(--color-accent);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 16px;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--color-bg);
+            padding: 4px;
+            border-radius: var(--radius-md);
+        }
+        .nav-tab {
+            padding: 8px 20px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+        .nav-tab:hover { color: var(--color-text-primary); }
+        .nav-tab.active {
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        .page { display: none; }
+        .page.active { display: block; }
+        .card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            margin-bottom: 20px;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--color-border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+        .card-body { padding: 24px; }
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        .param-group {
+            background: var(--color-surface-raised);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            border: 1px solid var(--color-border-light);
+        }
+        .param-group-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--color-border-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .param-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            gap: 8px;
+        }
+        .param-row:last-child { margin-bottom: 0; }
+        .param-label {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+        .param-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .param-input {
+            width: 110px;
+            padding: 6px 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: var(--font-mono);
+            text-align: right;
+            color: var(--color-text-primary);
+            background: #fffbeb;
+            transition: all var(--transition);
+        }
+        .param-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px var(--color-accent-light);
+        }
+        .param-unit {
+            font-size: 12px;
+            color: var(--color-text-tertiary);
+            min-width: 40px;
+        }
+        .param-note {
+            font-size: 11px;
+            color: var(--color-text-tertiary);
+            margin-top: 8px;
+            line-height: 1.5;
+            padding: 8px 10px;
+            background: var(--color-bg);
+            border-radius: 6px;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--color-border);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .kpi-card.oil::before { background: var(--chart-red); }
+        .kpi-card.electric::before { background: var(--chart-blue); }
+        .kpi-card.hybrid::before { background: var(--chart-green); }
+        .kpi-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px; }
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum" 1;
+        }
+        .kpi-unit { font-size: 14px; color: var(--color-text-secondary); margin-left: 2px; }
+        .kpi-sub { font-size: 12px; color: var(--color-text-tertiary); margin-top: 6px; }
+        .kpi-winner {
+            position: absolute;
+            top: 12px; right: 12px;
+            width: 22px; height: 22px;
+            background: var(--color-positive);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .conclusion-bar {
+            background: var(--color-accent-light);
+            border: 1px solid color-mix(in srgb, var(--color-accent) 15%, transparent);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .conclusion-bar .icon {
+            width: 22px; height: 22px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .conclusion-bar p {
+            font-size: 14px;
+            color: var(--color-text-primary);
+            margin: 0;
+            line-height: 1.7;
+        }
+        .conclusion-bar strong { color: var(--color-accent); }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table thead th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-surface-raised);
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+        .data-table tbody td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--color-border-light);
+            color: var(--color-text-primary);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .data-table tbody tr:hover { background: var(--color-surface-raised); }
+        .data-table tbody tr.winner { background: var(--color-positive-light); }
+        .data-table tbody tr.winner td:first-child { position: relative; }
+        .data-table tbody tr.winner td:first-child::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--color-positive);
+        }
+        .text-right { text-align: right !important; }
+        .text-center { text-align: center !important; }
+        .chart-container {
+            height: 400px;
+            position: relative;
+            margin: 20px 0;
+        }
+        .chart-canvas { width: 100%; height: 100%; }
+        .cost-breakdown {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .breakdown-item { text-align: center; padding: 16px; }
+        .breakdown-bar {
+            height: 160px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .breakdown-segment {
+            width: 36px;
+            border-radius: 4px 4px 0 0;
+            transition: all var(--transition);
+            position: relative;
+        }
+        .breakdown-segment:hover { opacity: 0.8; }
+        .breakdown-segment::after {
+            content: attr(data-value);
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+        .breakdown-segment:hover::after { opacity: 1; }
+        .breakdown-total {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .breakdown-total-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+        }
+        .breakdown-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            justify-content: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+        .legend-dot {
+            width: 8px; height: 8px;
+            border-radius: 2px;
+        }
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .compare-card {
+            background: var(--color-surface-raised);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            border: 2px solid var(--color-border);
+            transition: all var(--transition);
+        }
+        .compare-card.recommended {
+            border-color: var(--color-positive);
+            background: var(--color-positive-light);
+        }
+        .compare-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .compare-card-title { font-size: 15px; font-weight: 600; }
+        .compare-badge {
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .compare-badge.recommended {
+            background: var(--color-positive);
+            color: white;
+        }
+        .compare-badge.normal {
+            background: var(--color-bg);
+            color: var(--color-text-secondary);
+        }
+        .compare-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--color-border-light);
+            font-size: 13px;
+        }
+        .compare-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 15px;
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 2px solid var(--color-border);
+        }
+        .compare-result {
+            text-align: center;
+            padding: 24px;
+            background: var(--color-surface-raised);
+            border-radius: var(--radius-md);
+            margin-top: 20px;
+            border: 1px solid var(--color-border);
+        }
+        .compare-result-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--color-positive);
+            font-variant-numeric: tabular-nums;
+        }
+        .compare-result-label {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+        .sensitivity-table { overflow-x: auto; }
+        .diff-positive { color: var(--color-positive); font-weight: 600; }
+        .diff-negative { color: var(--color-danger); font-weight: 600; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+        .btn:hover { background: var(--color-bg); }
+        .btn-primary {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+        }
+        .btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 90%, black); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .tooltip {
+            position: relative;
+            display: inline-flex;
+            cursor: help;
+        }
+        .tooltip-icon {
+            width: 16px; height: 16px;
+            color: var(--color-text-quaternary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            border: 1px solid var(--color-text-quaternary);
+            border-radius: 50%;
+        }
+        .tooltip:hover .tooltip-text {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        .tooltip-text {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: var(--color-text-primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: normal;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition);
+            z-index: 50;
+            pointer-events: none;
+            max-width: 280px;
+            line-height: 1.5;
+        }
+        .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--color-text-primary);
+        }
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-number {
+            width: 24px; height: 24px;
+            background: var(--color-accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .guide-list {
+            list-style: none;
+            counter-reset: guide;
+        }
+        .guide-list > li {
+            position: relative;
+            padding-left: 36px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--color-text-secondary);
+        }
+        .guide-list > li::before {
+            counter-increment: guide;
+            content: counter(guide);
+            position: absolute;
+            left: 0; top: 0;
+            width: 24px; height: 24px;
+            background: var(--color-accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .guide-list strong {
+            color: var(--color-text-primary);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .highlight-box {
+            background: var(--color-warning-light);
+            border: 1px solid color-mix(in srgb, var(--color-warning) 20%, transparent);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin: 16px 0;
+            font-size: 13px;
+            color: var(--color-text-primary);
+            line-height: 1.7;
+        }
+        .highlight-box.warning {
+            background: var(--color-danger-light);
+            border-color: color-mix(in srgb, var(--color-danger) 20%, transparent);
+        }
+        @media (max-width: 768px) {
+            .header-inner { flex-direction: column; padding: 12px 16px; }
+            .container { padding: 16px; }
+            .kpi-grid { grid-template-columns: 1fr; }
+            .params-grid { grid-template-columns: 1fr; }
+            .cost-breakdown { grid-template-columns: 1fr; }
+            .compare-grid { grid-template-columns: 1fr; }
+            .param-input { width: 90px; }
+            .nav-tab { padding: 6px 14px; font-size: 13px; }
+            .chart-container { height: 280px; }
+        }
+        @media print {
+            .header, .btn, .nav-tabs { display: none; }
+            .page { display: block !important; }
+            .card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--color-text-quaternary); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-text-tertiary); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon">🚗</div>
+                <span>汽车成本测算模型</span>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="switchPage('calculator')">成本测算对比</button>
+                <button class="nav-tab" onclick="switchPage('trade')">换购决策</button>
+                <button class="nav-tab" onclick="switchPage('guide')">使用说明</button>
+            </nav>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-sm" onclick="resetAll()">↺ 重置参数</button>
+                <button class="btn btn-primary btn-sm" onclick="exportData()">↓ 导出数据</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- ===== 成本测算对比页 ===== -->
+        <div id="page-calculator" class="page active">
+            <div class="kpi-grid">
+                <div class="kpi-card oil" id="kpi-oil">
+                    <div class="kpi-label">油车年均成本</div>
+                    <div class="kpi-value"><span id="kpi-oil-value">--</span><span class="kpi-unit">元</span></div>
+                    <div class="kpi-sub" id="kpi-oil-sub">每公里 -- 元</div>
+                </div>
+                <div class="kpi-card electric" id="kpi-electric">
+                    <div class="kpi-winner" id="winner-badge" style="display:none">✓</div>
+                    <div class="kpi-label">电车年均成本</div>
+                    <div class="kpi-value"><span id="kpi-electric-value">--</span><span class="kpi-unit">元</span></div>
+                    <div class="kpi-sub" id="kpi-electric-sub">每公里 -- 元</div>
+                </div>
+                <div class="kpi-card hybrid" id="kpi-hybrid">
+                    <div class="kpi-label">混动年均成本</div>
+                    <div class="kpi-value"><span id="kpi-hybrid-value">--</span><span class="kpi-unit">元</span></div>
+                    <div class="kpi-sub" id="kpi-hybrid-sub">每公里 -- 元</div>
+                </div>
+            </div>
+
+            <div class="conclusion-bar" id="conclusion-bar">
+                <span class="icon">💡</span>
+                <p id="conclusion-text">正在计算...</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">① 参数设置</div>
+                        <div class="card-subtitle">黄色单元格 = 可手工修改，结果自动更新</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="params-grid">
+                        <div class="param-group">
+                            <div class="param-group-title"><span style="color:var(--chart-red)">●</span> 油车参数</div>
+                            <div class="param-row"><span class="param-label">采购成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-purchase" value="160000" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-consumption" value="7" step="0.1" oninput="calculate()"><span class="param-unit">L</span></div></div>
+                            <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-price" value="8" step="0.1" oninput="calculate()"><span class="param-unit">元/L</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-mileage" value="11000" step="500" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-maint-interval" value="10000" step="1000" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养金额</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-maint-cost" value="1500" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年度停车费</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-parking" value="3600" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年度保险费</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-insurance" value="3300" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎整套成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-tire-cost" value="2800" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-tire-interval" value="60000" step="5000" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">预计使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-years" value="10" min="1" max="30" oninput="calculate()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">到期残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="oil-residual" value="0" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                        </div>
+
+                        <div class="param-group">
+                            <div class="param-group-title"><span style="color:var(--chart-blue)">●</span> 电车参数</div>
+                            <div class="param-row"><span class="param-label">采购成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-purchase" value="160000" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-consumption" value="14" step="0.1" oninput="calculate()"><span class="param-unit">度</span></div></div>
+                            <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-price" value="0.8" step="0.05" oninput="calculate()"><span class="param-unit">元/度</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-mileage" value="12000" step="500" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-maint-interval" value="10000" step="1000" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养金额</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-maint-cost" value="500" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年度停车费</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-parking" value="3600" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年度保险费</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-insurance" value="4500" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎整套成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-tire-cost" value="4800" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-tire-interval" value="40000" step="5000" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">预计使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-years" value="10" min="1" max="30" oninput="calculate()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">到期残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="ev-residual" value="0" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                        </div>
+
+                        <div class="param-group">
+                            <div class="param-group-title"><span style="color:var(--chart-green)">●</span> 混动/增程参数（双能源：电＋油）</div>
+                            <div class="param-row"><span class="param-label">采购成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-purchase" value="160000" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-ev-consumption" value="0" step="0.1" oninput="calculate()"><span class="param-unit">度</span></div></div>
+                            <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-ev-price" value="0" step="0.05" oninput="calculate()"><span class="param-unit">元/度</span></div></div>
+                            <div class="param-row">
+                                <span class="param-label">用电里程占比
+                                    <span class="tooltip"><span class="tooltip-icon">?</span>
+                                        <span class="tooltip-text">有家充且通勤短填 70-80%，常跑长途/无充电条件填 30-50%</span>
+                                    </span>
+                                </span>
+                                <div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-ev-ratio" value="0" min="0" max="1" step="0.1" oninput="calculate()"><span class="param-unit">%</span></div>
+                            </div>
+                            <div class="param-row">
+                                <span class="param-label">亏电油耗（L/100km）
+                                    <span class="tooltip"><span class="tooltip-icon">?</span>
+                                        <span class="tooltip-text">电池耗尽后的纯油油耗：插混约4-6L，增程约5-7L（勿用官方综合油耗）</span>
+                                    </span>
+                                </span>
+                                <div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-oil-consumption" value="5" step="0.1" oninput="calculate()"><span class="param-unit">L</span></div>
+                            </div>
+                            <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-oil-price" value="8" step="0.1" oninput="calculate()"><span class="param-unit">元/L</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-mileage" value="12000" step="500" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-maint-interval" value="10000" step="1000" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养金额</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-maint-cost" value="1500" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年度停车费</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-parking" value="3600" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年度保险费</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-insurance" value="4000" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎整套成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-tire-cost" value="4000" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-tire-interval" value="50000" step="5000" oninput="calculate()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">预计使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-years" value="10" min="1" max="30" oninput="calculate()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">到期残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="hybrid-residual" value="0" oninput="calculate()"><span class="param-unit">元</span></div></div>
+                            <div class="param-note">若混动为不插电油混（HEV），把「用电里程占比」填 0，「亏电油耗」填其实际油耗即可</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">② 测算结果（按上方设定的使用年限）</div></div>
+                <div class="card-body">
+                    <div class="sensitivity-table">
+                        <table class="data-table" id="result-table">
+                            <thead><tr><th>项目</th><th class="text-right">油车</th><th class="text-right">电车</th><th class="text-right">混动/增程</th></tr></thead>
+                            <tbody id="result-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">③ 使用年限敏感性分析（1–15年，随参数自动重算）</div></div>
+                <div class="card-body">
+                    <div class="chart-container"><canvas id="sensitivity-chart" class="chart-canvas"></canvas></div>
+                    <div class="sensitivity-table">
+                        <table class="data-table" id="sensitivity-table">
+                            <thead>
+                                <tr>
+                                    <th>使用年限（年）</th>
+                                    <th class="text-right">油车总成本</th>
+                                    <th class="text-right">油车年均</th>
+                                    <th class="text-right">电车总成本</th>
+                                    <th class="text-right">电车年均</th>
+                                    <th class="text-right">混动总成本</th>
+                                    <th class="text-right">混动年均</th>
+                                    <th class="text-center">年均最低车型</th>
+                                    <th class="text-right">差额</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sensitivity-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">④ 成本构成（按设定年限）</div></div>
+                <div class="card-body">
+                    <div class="cost-breakdown" id="cost-breakdown"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 换购决策页 ===== -->
+        <div id="page-trade" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">换购决策 · 现在就换 vs 开到旧车报废再换</div>
+                        <div class="card-subtitle">本页参数全部独立填写、独立计算，与「成本测算对比」表互不影响</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="section-title"><span class="section-number">1</span>现有旧车（黄色单元格 = 可手工修改）</div>
+                    <div class="params-grid" style="margin-bottom:24px;">
+                        <div class="param-group">
+                            <div class="param-group-title">基本信息</div>
+                            <div class="param-row"><span class="param-label">当前残值（现在卖出价）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-residual-now" value="50000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">已使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-years-used" value="4" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">旧车剩余年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-years-left" value="6" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">报废时残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-residual-end" value="10000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                        </div>
+                        <div class="param-group">
+                            <div class="param-group-title">使用成本</div>
+                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-ratio" value="0" min="0" max="1" step="0.1" oninput="calculateTrade()"><span class="param-unit">%</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-oil-consumption" value="7" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
+                            <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-oil-price" value="8" step="0.1" oninput="calculateTrade()"><span class="param-unit">元/L</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
+                            <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-price" value="0" step="0.05" oninput="calculateTrade()"><span class="param-unit">元/度</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-mileage" value="7500" step="500" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">年保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-maint-annual" value="1500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年保险费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-insurance" value="3000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年停车费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-parking" value="3600" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-tire-cost" value="2800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title"><span class="section-number">2</span>换购新车（独立填写，不引用其他表）</div>
+                    <div class="params-grid" style="margin-bottom:24px;">
+                        <div class="param-group">
+                            <div class="param-group-title">基本信息</div>
+                            <div class="param-row"><span class="param-label">新车采购成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-purchase" value="160000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">新车预计使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-years" value="8" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">新车到期残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-residual" value="10000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                        </div>
+                        <div class="param-group">
+                            <div class="param-group-title">使用成本</div>
+                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-ratio" value="1" min="0" max="1" step="0.1" oninput="calculateTrade()"><span class="param-unit">%</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-consumption" value="14" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
+                            <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-price" value="0.8" step="0.05" oninput="calculateTrade()"><span class="param-unit">元/度</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
+                            <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-price" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">元/L</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-mileage" value="15000" step="500" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">年保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-maint-annual" value="500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年保险费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-insurance" value="4500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年停车费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-parking" value="3600" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-tire-cost" value="4800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title"><span class="section-number">3</span>两种策略现金流对比（统一对比到旧车剩余年限末，期末双方各持有一辆新车）</div>
+                    <div id="trade-compare-wrap">
+                        <div class="compare-grid" id="trade-compare"></div>
+                    </div>
+
+                    <div class="section-title" style="margin-top:24px;"><span class="section-number">4</span>敏感性：若第 n 年就换车（n ≤ 剩余年限与新车年限的较小值）</div>
+                    <div class="sensitivity-table">
+                        <table class="data-table" id="trade-sensitivity-table">
+                            <thead>
+                                <tr>
+                                    <th>持有年限 n（年）</th>
+                                    <th class="text-right">方案A净成本</th>
+                                    <th class="text-right">方案B净成本</th>
+                                    <th class="text-right">差额（A−B）</th>
+                                    <th class="text-center">更划算方案</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trade-sensitivity-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="param-note" style="margin-top:12px;">
+                        注：前几年的净成本可能为负，属正常——手里车辆可变现价值高于累计现金支出，比较请直接看「差额」列
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 使用说明页 ===== -->
+        <div id="page-guide" class="page">
+            <div class="card">
+                <div class="card-header"><div class="card-title">使用说明</div></div>
+                <div class="card-body">
+                    <ol class="guide-list">
+                        <li><strong>黄色参数为可修改项</strong>在「成本测算对比」和「换购决策」页面，所有黄色背景的输入框都可以直接修改，修改后全部结果与图表自动更新。</li>
+                        <li><strong>混动/增程为双能源车型</strong>年能源费 = 里程 × 用电占比 × 电耗 × 电价 ＋ 里程 × (1−用电占比) × 亏电油耗 × 油价</li>
+                        <li><strong>「用电里程占比」是最关键假设</strong>有家充且通勤短填 70-80%，常跑长途或无充电条件填 30-50%。</li>
+                        <li><strong>「亏电油耗」请填实际值</strong>电池耗尽后的纯油油耗：插混约4-6L、增程约5-7L，不要用官方综合油耗。</li>
+                        <li><strong>「到期残值」为新增参数</strong>默认填 0 时与你原 Excel 口径完全一致，可按预估卖车价填写。</li>
+                        <li><strong>敏感性表自动着色</strong>每行列出该使用年限下年均成本最低的车型，差额/最省单元格自动高亮。</li>
+                        <li><strong>若混动为不插电油混（HEV）</strong>把「用电里程占比」填 0，「亏电油耗」填其实际油耗即可。</li>
+                        <li><strong>「换购决策」为独立工作表</strong>旧车、新车参数全部在该页单独填写，不引用新购模型数据，两表互不影响。</li>
+                    </ol>
+                    <div class="highlight-box">
+                        <strong>换购决策对比口径说明：</strong><br>
+                        对比到旧车剩余年限末，两方案各持一辆新车（A已开剩余年限年、B刚买）；净成本＝现金支出−期末车辆可变现价值；新车价值按直线折旧（采购价→到期残值÷使用年限），旧车残值从当前残值直线降至报废残值；假设届时新车价格不变。
+                    </div>
+                    <div class="highlight-box warning">
+                        <strong>注意：</strong>前几年的净成本可能为负，属正常——手里车辆可变现价值高于累计现金支出，比较请直接看「差额」列。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <script>
+        // ========== 页面切换 ==========
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            event.target.classList.add('active');
+            if (pageId === 'calculator') calculate();
+            if (pageId === 'trade') calculateTrade();
+        }
+
+        // ========== 格式化 ==========
+        function fmt(num, decimals) {
+            if (decimals === undefined) decimals = 0;
+            if (decimals === 0) return Math.round(num).toLocaleString('zh-CN');
+            return num.toFixed(decimals).toLocaleString('zh-CN');
+        }
+        function fmtYuan(num) {
+            return '¥' + Math.round(num).toLocaleString('zh-CN');
+        }
+
+        // ========== 成本测算核心计算 ==========
+        function calculate() {
+            // 读取油车参数
+            const oil = {
+                purchase: +document.getElementById('oil-purchase').value || 0,
+                consumption: +document.getElementById('oil-consumption').value || 0,
+                price: +document.getElementById('oil-price').value || 0,
+                mileage: +document.getElementById('oil-mileage').value || 0,
+                maintInterval: +document.getElementById('oil-maint-interval').value || 1,
+                maintCost: +document.getElementById('oil-maint-cost').value || 0,
+                parking: +document.getElementById('oil-parking').value || 0,
+                insurance: +document.getElementById('oil-insurance').value || 0,
+                tireCost: +document.getElementById('oil-tire-cost').value || 0,
+                tireInterval: +document.getElementById('oil-tire-interval').value || 1,
+                years: +document.getElementById('oil-years').value || 1,
+                residual: +document.getElementById('oil-residual').value || 0
+            };
+
+            // 读取电车参数
+            const ev = {
+                purchase: +document.getElementById('ev-purchase').value || 0,
+                consumption: +document.getElementById('ev-consumption').value || 0,
+                price: +document.getElementById('ev-price').value || 0,
+                mileage: +document.getElementById('ev-mileage').value || 0,
+                maintInterval: +document.getElementById('ev-maint-interval').value || 1,
+                maintCost: +document.getElementById('ev-maint-cost').value || 0,
+                parking: +document.getElementById('ev-parking').value || 0,
+                insurance: +document.getElementById('ev-insurance').value || 0,
+                tireCost: +document.getElementById('ev-tire-cost').value || 0,
+                tireInterval: +document.getElementById('ev-tire-interval').value || 1,
+                years: +document.getElementById('ev-years').value || 1,
+                residual: +document.getElementById('ev-residual').value || 0
+            };
+
+            // 读取混动参数
+            const hybrid = {
+                purchase: +document.getElementById('hybrid-purchase').value || 0,
+                evConsumption: +document.getElementById('hybrid-ev-consumption').value || 0,
+                evPrice: +document.getElementById('hybrid-ev-price').value || 0,
+                evRatio: +document.getElementById('hybrid-ev-ratio').value || 0,
+                oilConsumption: +document.getElementById('hybrid-oil-consumption').value || 0,
+                oilPrice: +document.getElementById('hybrid-oil-price').value || 0,
+                mileage: +document.getElementById('hybrid-mileage').value || 0,
+                maintInterval: +document.getElementById('hybrid-maint-interval').value || 1,
+                maintCost: +document.getElementById('hybrid-maint-cost').value || 0,
+                parking: +document.getElementById('hybrid-parking').value || 0,
+                insurance: +document.getElementById('hybrid-insurance').value || 0,
+                tireCost: +document.getElementById('hybrid-tire-cost').value || 0,
+                tireInterval: +document.getElementById('hybrid-tire-interval').value || 1,
+                years: +document.getElementById('hybrid-years').value || 1,
+                residual: +document.getElementById('hybrid-residual').value || 0
+            };
+
+            // 计算单车成本 - 严格复刻Excel公式
+            function calcCar(params, type) {
+                const years = params.years;
+                const totalMileage = params.mileage * years;
+
+                // 年能源费用
+                let energyAnnual;
+                if (type === 'oil') {
+                    // =C8*C10/100*C9  -> consumption * mileage / 100 * price
+                    energyAnnual = params.consumption * params.mileage / 100 * params.price;
+                } else if (type === 'ev') {
+                    energyAnnual = params.consumption * params.mileage / 100 * params.price;
+                } else {
+                    // =C41*C38*C36/100*C37+C41*(1-C38)*C39/100*C40
+                    // mileage * evRatio * evConsumption / 100 * evPrice + mileage * (1-evRatio) * oilConsumption / 100 * oilPrice
+                    energyAnnual = params.mileage * params.evRatio * params.evConsumption / 100 * params.evPrice +
+                                   params.mileage * (1 - params.evRatio) * params.oilConsumption / 100 * params.oilPrice;
+                }
+
+                // 年保养费用 = mileage / maintInterval * maintCost
+                const maintAnnual = params.mileage / params.maintInterval * params.maintCost;
+
+                // 年轮胎费用 = mileage / tireInterval * tireCost
+                const tireAnnual = params.mileage / params.tireInterval * params.tireCost;
+
+                // 年停车+保险
+                const parkInsAnnual = params.parking + params.insurance;
+
+                // 年行驶成本小计
+                const runCostAnnual = energyAnnual + maintAnnual + tireAnnual + parkInsAnnual;
+
+                // 生命周期总成本 = purchase + runCostAnnual * years - residual
+                const totalCost = params.purchase + runCostAnnual * years - params.residual;
+
+                // 年均成本 = totalCost / years
+                const annualCost = totalCost / years;
+
+                // 每公里成本 = totalCost / (mileage * years)
+                const perKmCost = totalCost / (params.mileage * years);
+
+                return {
+                    energyAnnual, maintAnnual, tireAnnual, parkInsAnnual, runCostAnnual,
+                    totalCost, annualCost, perKmCost,
+                    purchase: params.purchase, residual: params.residual,
+                    energyTotal: energyAnnual * years,
+                    maintTotal: maintAnnual * years,
+                    tireTotal: tireAnnual * years,
+                    parkingTotal: params.parking * years,
+                    insuranceTotal: params.insurance * years
+                };
+            }
+
+            const oilResult = calcCar(oil, 'oil');
+            const evResult = calcCar(ev, 'ev');
+            const hybridResult = calcCar(hybrid, 'hybrid');
+
+            // 更新KPI
+            document.getElementById('kpi-oil-value').textContent = fmt(oilResult.annualCost);
+            document.getElementById('kpi-oil-sub').textContent = `每公里 ${oilResult.perKmCost.toFixed(2)} 元`;
+            document.getElementById('kpi-electric-value').textContent = fmt(evResult.annualCost);
+            document.getElementById('kpi-electric-sub').textContent = `每公里 ${evResult.perKmCost.toFixed(2)} 元`;
+            document.getElementById('kpi-hybrid-value').textContent = fmt(hybridResult.annualCost);
+            document.getElementById('kpi-hybrid-sub').textContent = `每公里 ${hybridResult.perKmCost.toFixed(2)} 元`;
+
+            // 标记赢家
+            const minAnnual = Math.min(oilResult.annualCost, evResult.annualCost, hybridResult.annualCost);
+            document.getElementById('winner-badge').style.display = minAnnual === evResult.annualCost ? 'flex' : 'none';
+
+            // 更新结论
+            const winnerName = minAnnual === oilResult.annualCost ? '油车' : 
+                              minAnnual === evResult.annualCost ? '电车' : '混动/增程';
+
+            // 结论1: 电车从第几年起低于油车
+            let conclusion1 = '';
+            let evBetterThanOilCount = 0;
+            for (let y = 1; y <= 15; y++) {
+                const o = calcCar({...oil, years: y}, 'oil');
+                const e = calcCar({...ev, years: y}, 'ev');
+                if (e.annualCost < o.annualCost) evBetterThanOilCount++;
+            }
+            if (evBetterThanOilCount === 0) {
+                conclusion1 = '结论1：15年内电车年均成本始终不低于油车';
+            } else if (evBetterThanOilCount === 15) {
+                conclusion1 = '结论1：电车从第 1 年起年均成本就低于油车';
+            } else {
+                const firstBetter = 16 - evBetterThanOilCount;
+                conclusion1 = `结论1：电车从第 ${firstBetter} 年起年均成本开始低于油车`;
+            }
+
+            // 结论2
+            const longTermWinner = (function() {
+                const o15 = calcCar({...oil, years: 15}, 'oil');
+                const e15 = calcCar({...ev, years: 15}, 'ev');
+                const h15 = calcCar({...hybrid, years: 15}, 'hybrid');
+                const min15 = Math.min(o15.annualCost, e15.annualCost, h15.annualCost);
+                return o15.annualCost === min15 ? '油车' : e15.annualCost === min15 ? '电车' : '混动/增程';
+            })();
+            const shortTermWinner = (function() {
+                const o1 = calcCar({...oil, years: 1}, 'oil');
+                const e1 = calcCar({...ev, years: 1}, 'ev');
+                const h1 = calcCar({...hybrid, years: 1}, 'hybrid');
+                const min1 = Math.min(o1.annualCost, e1.annualCost, h1.annualCost);
+                return o1.annualCost === min1 ? '油车' : e1.annualCost === min1 ? '电车' : '混动/增程';
+            })();
+
+            document.getElementById('conclusion-text').innerHTML = 
+                conclusion1 + '<br>' +
+                `结论2：按当前参数，长期使用（15年）年均成本最低的是：<strong>${longTermWinner}</strong>；短期（1年）最低的是：<strong>${shortTermWinner}</strong>`;
+
+            // 更新结果表格
+            const tbody = document.getElementById('result-tbody');
+            tbody.innerHTML = `
+                <tr><td>年能源费用</td><td class="text-right">${fmt(oilResult.energyAnnual)}</td><td class="text-right">${fmt(evResult.energyAnnual)}</td><td class="text-right">${fmt(hybridResult.energyAnnual)}</td></tr>
+                <tr><td>年保养费用</td><td class="text-right">${fmt(oilResult.maintAnnual)}</td><td class="text-right">${fmt(evResult.maintAnnual)}</td><td class="text-right">${fmt(hybridResult.maintAnnual)}</td></tr>
+                <tr><td>年轮胎费用</td><td class="text-right">${fmt(oilResult.tireAnnual)}</td><td class="text-right">${fmt(evResult.tireAnnual)}</td><td class="text-right">${fmt(hybridResult.tireAnnual)}</td></tr>
+                <tr><td>年停车＋保险</td><td class="text-right">${fmt(oilResult.parkInsAnnual)}</td><td class="text-right">${fmt(evResult.parkInsAnnual)}</td><td class="text-right">${fmt(hybridResult.parkInsAnnual)}</td></tr>
+                <tr style="font-weight:600;background:var(--color-surface-raised)"><td>年行驶成本小计</td><td class="text-right">${fmt(oilResult.runCostAnnual)}</td><td class="text-right">${fmt(evResult.runCostAnnual)}</td><td class="text-right">${fmt(hybridResult.runCostAnnual)}</td></tr>
+                <tr style="font-weight:600"><td>生命周期总成本</td><td class="text-right">${fmt(oilResult.totalCost)}</td><td class="text-right">${fmt(evResult.totalCost)}</td><td class="text-right">${fmt(hybridResult.totalCost)}</td></tr>
+                <tr style="font-weight:600;color:var(--color-accent)"><td>★ 年均成本</td><td class="text-right">${fmt(oilResult.annualCost)}</td><td class="text-right">${fmt(evResult.annualCost)}</td><td class="text-right">${fmt(hybridResult.annualCost)}</td></tr>
+                <tr><td>每公里成本（元/km）</td><td class="text-right">${oilResult.perKmCost.toFixed(2)}</td><td class="text-right">${evResult.perKmCost.toFixed(2)}</td><td class="text-right">${hybridResult.perKmCost.toFixed(2)}</td></tr>
+            `;
+
+            // 敏感性分析 - 严格复刻Excel公式
+            const sensTbody = document.getElementById('sensitivity-tbody');
+            let sensHTML = '';
+
+            for (let y = 1; y <= 15; y++) {
+                // 油车: =$C$7+$C$58*B69-$C$18 -> purchase + runCostAnnual * years - residual
+                const oTotal = oil.purchase + oilResult.runCostAnnual * y - oil.residual;
+                const oAnnual = oTotal / y;
+
+                // 电车
+                const eTotal = ev.purchase + evResult.runCostAnnual * y - ev.residual;
+                const eAnnual = eTotal / y;
+
+                // 混动
+                const hTotal = hybrid.purchase + hybridResult.runCostAnnual * y - hybrid.residual;
+                const hAnnual = hTotal / y;
+
+                // =IF(AND(D69<=F69,D69<=H69),"油车",IF(F69<=H69,"电车","混动"))
+                let winner;
+                if (oAnnual <= eAnnual && oAnnual <= hAnnual) winner = '油车';
+                else if (eAnnual <= hAnnual) winner = '电车';
+                else winner = '混动';
+
+                const diff = Math.abs(oTotal - eTotal);
+                const isWinner = (w) => {
+                    if (w === '油车' && oAnnual <= eAnnual && oAnnual <= hAnnual) return 'winner';
+                    if (w === '电车' && eAnnual <= oAnnual && eAnnual <= hAnnual) return 'winner';
+                    if (w === '混动' && hAnnual <= oAnnual && hAnnual <= eAnnual) return 'winner';
+                    return '';
+                };
+
+                const winnerColor = winner === '电车' ? 'var(--color-accent)' : winner === '混动' ? 'var(--color-positive)' : 'var(--color-danger)';
+
+                sensHTML += `<tr class="${isWinner(winner)}">
+                    <td>${y}</td>
+                    <td class="text-right">${fmt(oTotal)}</td>
+                    <td class="text-right">${fmt(oAnnual)}</td>
+                    <td class="text-right">${fmt(eTotal)}</td>
+                    <td class="text-right">${fmt(eAnnual)}</td>
+                    <td class="text-right">${fmt(hTotal)}</td>
+                    <td class="text-right">${fmt(hAnnual)}</td>
+                    <td class="text-center" style="font-weight:600;color:${winnerColor}">${winner}</td>
+                    <td class="text-right">${fmt(diff)}</td>
+                </tr>`;
+            }
+            sensTbody.innerHTML = sensHTML;
+
+            // 绘制敏感性图表
+            drawSensitivityChart(oil, ev, hybrid, oilResult, evResult, hybridResult);
+
+            // 成本构成
+            const breakdown = document.getElementById('cost-breakdown');
+            const categories = [
+                {name: '购车净支出', color: '#86868b'},
+                {name: '能源费用', color: '#0071e3'},
+                {name: '保养费用', color: '#ff9500'},
+                {name: '轮胎费用', color: '#af52de'},
+                {name: '停车+保险', color: '#34c759'}
+            ];
+
+            const oilData = {
+                purchase: oilResult.purchase - oilResult.residual,
+                energy: oilResult.energyTotal,
+                maint: oilResult.maintTotal,
+                tire: oilResult.tireTotal,
+                parkIns: oilResult.parkingTotal + oilResult.insuranceTotal
+            };
+            const evData = {
+                purchase: evResult.purchase - evResult.residual,
+                energy: evResult.energyTotal,
+                maint: evResult.maintTotal,
+                tire: evResult.tireTotal,
+                parkIns: evResult.parkingTotal + evResult.insuranceTotal
+            };
+            const hybridData = {
+                purchase: hybridResult.purchase - hybridResult.residual,
+                energy: hybridResult.energyTotal,
+                maint: hybridResult.maintTotal,
+                tire: hybridResult.tireTotal,
+                parkIns: hybridResult.parkingTotal + hybridResult.insuranceTotal
+            };
+
+            const dataKeys = ['purchase', 'energy', 'maint', 'tire', 'parkIns'];
+
+            breakdown.innerHTML = [
+                {name: '油车', data: oilData, color: 'var(--chart-red)', colorHex: '#ff3b30'},
+                {name: '电车', data: evData, color: 'var(--chart-blue)', colorHex: '#0071e3'},
+                {name: '混动', data: hybridData, color: 'var(--chart-green)', colorHex: '#34c759'}
+            ].map(item => {
+                const total = dataKeys.reduce((sum, k) => sum + item.data[k], 0);
+                return `
+                    <div class="breakdown-item">
+                        <div style="font-size:15px;font-weight:600;margin-bottom:12px;color:${item.color}">${item.name}</div>
+                        <div class="breakdown-bar">
+                            ${dataKeys.map((k, i) => {
+                                const val = item.data[k];
+                                const h = total > 0 ? (val / total) * 140 : 0;
+                                return `<div class="breakdown-segment" style="height:${Math.max(h, 4)}px;background:${categories[i].color}" data-value="${fmt(val)}"></div>`;
+                            }).join('')}
+                        </div>
+                        <div class="breakdown-total">${fmt(total)}</div>
+                        <div class="breakdown-total-label">总成本（元）</div>
+                        <div class="breakdown-legend">
+                            ${categories.map((cat, i) => `
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background:${cat.color}"></div>
+                                    <span>${cat.name} ${fmt(item.data[dataKeys[i]])}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            saveParams();
+        }
+
+        // ========== 绘制敏感性图表 ==========
+        function drawSensitivityChart(oil, ev, hybrid, oilR, evR, hybridR) {
+            const canvas = document.getElementById('sensitivity-chart');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+            const padding = {top: 50, right: 80, bottom: 50, left: 70};
+            const chartW = width - padding.left - padding.right;
+            const chartH = height - padding.top - padding.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // 生成数据
+            const years = [];
+            const oilData = [], evData = [], hybridData = [];
+            for (let y = 1; y <= 15; y++) {
+                years.push(y);
+                const oTotal = oil.purchase + oilR.runCostAnnual * y - oil.residual;
+                const eTotal = ev.purchase + evR.runCostAnnual * y - ev.residual;
+                const hTotal = hybrid.purchase + hybridR.runCostAnnual * y - hybrid.residual;
+                oilData.push(oTotal / y);
+                evData.push(eTotal / y);
+                hybridData.push(hTotal / y);
+            }
+
+            const allValues = [...oilData, ...evData, ...hybridData];
+            const minVal = Math.min(...allValues) * 0.9;
+            const maxVal = Math.max(...allValues) * 1.05;
+
+            const xScale = chartW / (years.length - 1);
+            const yScale = chartH / (maxVal - minVal);
+
+            function toX(i) { return padding.left + i * xScale; }
+            function toY(v) { return padding.top + chartH - (v - minVal) * yScale; }
+
+            // 网格线
+            ctx.strokeStyle = '#e5e5e7';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + chartH * i / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+
+                const val = maxVal - (maxVal - minVal) * i / 5;
+                ctx.fillStyle = '#86868b';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.round(val).toLocaleString(), padding.left - 10, y + 4);
+            }
+
+            // X轴标签
+            ctx.fillStyle = '#86868b';
+            ctx.font = '11px sans-serif';
+            ctx.textAlign = 'center';
+            years.forEach((y, i) => {
+                ctx.fillText(y + '年', toX(i), height - padding.bottom + 20);
+            });
+
+            // 绘制折线
+            function drawLine(data, color, label) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2.5;
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                data.forEach((v, i) => {
+                    if (i === 0) ctx.moveTo(toX(i), toY(v));
+                    else ctx.lineTo(toX(i), toY(v));
+                });
+                ctx.stroke();
+
+                ctx.fillStyle = color;
+                data.forEach((v, i) => {
+                    ctx.beginPath();
+                    ctx.arc(toX(i), toY(v), 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // 白色边框
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2.5;
+                });
+
+                const lastIdx = data.length - 1;
+                ctx.fillStyle = color;
+                ctx.font = '600 12px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(label, toX(lastIdx) + 10, toY(data[lastIdx]) + 4);
+            }
+
+            drawLine(oilData, '#ff3b30', '油车');
+            drawLine(evData, '#0071e3', '电车');
+            drawLine(hybridData, '#34c759', '混动');
+
+            // 标题
+            ctx.fillStyle = '#1d1d1f';
+            ctx.font = '600 14px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('年均成本随使用年限变化趋势（元/年）', padding.left, 28);
+
+            // 轴标签
+            ctx.fillStyle = '#86868b';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('使用年限（年）', width / 2, height - 10);
+        }
+
+
+        // ========== 换购决策计算 ==========
+        function calculateTrade() {
+            // 旧车参数
+            const old = {
+                residualNow: +document.getElementById('old-residual-now').value || 0,
+                yearsUsed: +document.getElementById('old-years-used').value || 0,
+                yearsLeft: +document.getElementById('old-years-left').value || 0,
+                residualEnd: +document.getElementById('old-residual-end').value || 0,
+                evRatio: +document.getElementById('old-ev-ratio').value || 0,
+                oilConsumption: +document.getElementById('old-oil-consumption').value || 0,
+                oilPrice: +document.getElementById('old-oil-price').value || 0,
+                evConsumption: +document.getElementById('old-ev-consumption').value || 0,
+                evPrice: +document.getElementById('old-ev-price').value || 0,
+                mileage: +document.getElementById('old-mileage').value || 0,
+                maintAnnual: +document.getElementById('old-maint-annual').value || 0,
+                insurance: +document.getElementById('old-insurance').value || 0,
+                parking: +document.getElementById('old-parking').value || 0,
+                tireCost: +document.getElementById('old-tire-cost').value || 0
+            };
+
+            // 新车参数
+            const newCar = {
+                purchase: +document.getElementById('new-purchase').value || 0,
+                years: +document.getElementById('new-years').value || 0,
+                residual: +document.getElementById('new-residual').value || 0,
+                evRatio: +document.getElementById('new-ev-ratio').value || 0,
+                evConsumption: +document.getElementById('new-ev-consumption').value || 0,
+                evPrice: +document.getElementById('new-ev-price').value || 0,
+                oilConsumption: +document.getElementById('new-oil-consumption').value || 0,
+                oilPrice: +document.getElementById('new-oil-price').value || 0,
+                mileage: +document.getElementById('new-mileage').value || 0,
+                maintAnnual: +document.getElementById('new-maint-annual').value || 0,
+                insurance: +document.getElementById('new-insurance').value || 0,
+                parking: +document.getElementById('new-parking').value || 0,
+                tireCost: +document.getElementById('new-tire-cost').value || 0
+            };
+
+            const n = old.yearsLeft;
+            if (n <= 0) return;
+
+            // 旧车年能源费 =C16*C11*C14/100*C15+C16*(1-C11)*C12/100*C13
+            // mileage * evRatio * evConsumption / 100 * evPrice + mileage * (1-evRatio) * oilConsumption / 100 * oilPrice
+            const oldEnergy = old.mileage * old.evRatio * old.evConsumption / 100 * old.evPrice +
+                              old.mileage * (1 - old.evRatio) * old.oilConsumption / 100 * old.oilPrice;
+
+            // 旧车年轮胎费用 =C16/60000*C21 -> mileage / 60000 * tireCost
+            const oldTireAnnual = old.mileage / 60000 * old.tireCost;
+
+            // 年行驶成本（能源+保养+保险+停车+轮胎）
+            const oldAnnualCost = oldEnergy + old.maintAnnual + old.insurance + old.parking + oldTireAnnual;
+
+            // 新车年能源费
+            const newEnergy = newCar.mileage * newCar.evRatio * newCar.evConsumption / 100 * newCar.evPrice +
+                              newCar.mileage * (1 - newCar.evRatio) * newCar.oilConsumption / 100 * newCar.oilPrice;
+
+            // 新车年轮胎费用 =C33/45000*C38
+            const newTireAnnual = newCar.mileage / 45000 * newCar.tireCost;
+
+            const newAnnualCost = newEnergy + newCar.maintAnnual + newCar.insurance + newCar.parking + newTireAnnual;
+
+            // ===== 方案A：现在就换 =====
+            // C47: =$C$25 买新车支出
+            const aBuyNew = newCar.purchase;
+            // C48: =-$C$7 卖旧车收入
+            const aSellOld = -old.residualNow;
+            // C49: =0 旧车行驶成本
+            const aOldRunning = 0;
+            // C50: =$D$44*$C$9 新车行驶成本
+            const aNewRunning = newAnnualCost * n;
+            // C51: =-($C$25-($C$25-$C$27)*$C$9/$C$26) 期末车辆价值
+            // -(purchase - (purchase - residual) * yearsLeft / years)
+            const aCarValue = -(newCar.purchase - (newCar.purchase - newCar.residual) * n / newCar.years);
+            // C52: =SUM(C47:C51) 净成本合计
+            const planA = aBuyNew + aSellOld + aOldRunning + aNewRunning + aCarValue;
+            // C53: =C52/$C$9 年均成本
+            const planAAnnual = planA / n;
+
+            // ===== 方案B：开到报废再换 =====
+            // D47: =$C$25 买新车支出
+            const bBuyNew = newCar.purchase;
+            // D48: =-$C$10 卖旧车收入（报废时）
+            const bSellOld = -old.residualEnd;
+            // D49: =$C$44*$C$9 旧车行驶成本
+            const bOldRunning = oldAnnualCost * n;
+            // D50: =0 新车行驶成本
+            const bNewRunning = 0;
+            // D51: =-$C$25 期末车辆价值（刚买的新车，价值=purchase）
+            const bCarValue = -newCar.purchase;
+            // D52: =SUM(D47:D51) 净成本合计
+            const planB = bBuyNew + bSellOld + bOldRunning + bNewRunning + bCarValue;
+            // D53: =D52/$C$9 年均成本
+            const planBAnnual = planB / n;
+
+            // C54: =C52-D52 差额
+            const diff = planA - planB;
+            const planBIsBetter = diff > 0;
+
+            // 更新对比卡片
+            const compareDiv = document.getElementById('trade-compare');
+            compareDiv.innerHTML = `
+                <div class="compare-card ${!planBIsBetter ? 'recommended' : ''}">
+                    <div class="compare-card-header">
+                        <span class="compare-card-title">方案A：现在就换</span>
+                        <span class="compare-badge ${!planBIsBetter ? 'recommended' : 'normal'}">${!planBIsBetter ? '推荐' : '备选'}</span>
+                    </div>
+                    <div class="compare-row"><span>买新车支出</span><span>${fmtYuan(aBuyNew)}</span></div>
+                    <div class="compare-row"><span>卖旧车收入（−）</span><span style="color:var(--color-positive)">${fmtYuan(aSellOld)}</span></div>
+                    <div class="compare-row"><span>旧车行驶成本（${n}年）</span><span>${fmtYuan(aOldRunning)}</span></div>
+                    <div class="compare-row"><span>新车行驶成本（${n}年）</span><span>${fmtYuan(aNewRunning)}</span></div>
+                    <div class="compare-row"><span>期末车辆价值（−）</span><span style="color:var(--color-positive)">${fmtYuan(aCarValue)}</span></div>
+                    <div class="compare-row"><span>★ 净成本合计</span><span style="font-size:16px">${fmtYuan(planA)}</span></div>
+                    <div class="compare-row"><span>★ 年均成本</span><span>${fmtYuan(planAAnnual)}/年</span></div>
+                </div>
+                <div class="compare-card ${planBIsBetter ? 'recommended' : ''}">
+                    <div class="compare-card-header">
+                        <span class="compare-card-title">方案B：开到报废再换</span>
+                        <span class="compare-badge ${planBIsBetter ? 'recommended' : 'normal'}">${planBIsBetter ? '推荐' : '备选'}</span>
+                    </div>
+                    <div class="compare-row"><span>买新车支出</span><span>${fmtYuan(bBuyNew)}</span></div>
+                    <div class="compare-row"><span>卖旧车收入（−）</span><span style="color:var(--color-positive)">${fmtYuan(bSellOld)}</span></div>
+                    <div class="compare-row"><span>旧车行驶成本（${n}年）</span><span>${fmtYuan(bOldRunning)}</span></div>
+                    <div class="compare-row"><span>新车行驶成本（${n}年）</span><span>${fmtYuan(bNewRunning)}</span></div>
+                    <div class="compare-row"><span>期末车辆价值（−）</span><span style="color:var(--color-positive)">${fmtYuan(bCarValue)}</span></div>
+                    <div class="compare-row"><span>★ 净成本合计</span><span style="font-size:16px">${fmtYuan(planB)}</span></div>
+                    <div class="compare-row"><span>★ 年均成本</span><span>${fmtYuan(planBAnnual)}/年</span></div>
+                </div>
+            `;
+
+            // 结果汇总
+            const wrap = document.getElementById('trade-compare-wrap');
+            let resultDiv = wrap.querySelector('.compare-result');
+            if (!resultDiv) {
+                resultDiv = document.createElement('div');
+                resultDiv.className = 'compare-result';
+                wrap.appendChild(resultDiv);
+            }
+            resultDiv.innerHTML = `
+                <div class="compare-result-value">${planBIsBetter ? '方案B更省' : '方案A更省'} ${fmtYuan(Math.abs(diff))}</div>
+                <div class="compare-result-label">
+                    ${planBIsBetter ? '开到旧车报废再换' : '现在就换'}，${n}年净省 ${fmtYuan(Math.abs(diff))}（年均省 ${fmtYuan(Math.abs(diff) / n)}）
+                </div>
+            `;
+
+            // 敏感性分析
+            const sensTbody = document.getElementById('trade-sensitivity-tbody');
+            let sensHTML = '';
+            const maxN = Math.min(old.yearsLeft, newCar.years);
+
+            for (let year = 1; year <= 15; year++) {
+                if (year > maxN) {
+                    sensHTML += `<tr><td>${year}</td><td class="text-right">—</td><td class="text-right">—</td><td class="text-right">—</td><td class="text-center">—</td></tr>`;
+                    continue;
+                }
+
+                // 方案A: =$C$25-$C$7+$D$44*$B60-($C$25-($C$25-$C$27)*$B60/$C$26)
+                // purchase - residualNow + newAnnualCost * year - (purchase - (purchase - residual) * year / years)
+                const aTotal = newCar.purchase - old.residualNow + newAnnualCost * year - 
+                               (newCar.purchase - (newCar.purchase - newCar.residual) * year / newCar.years);
+
+                // 方案B: =$C$44*$B60-($C$7-($C$7-$C$10)*$B60/$C$9)
+                // oldAnnualCost * year - (residualNow - (residualNow - residualEnd) * year / yearsLeft)
+                const bTotal = oldAnnualCost * year - (old.residualNow - (old.residualNow - old.residualEnd) * year / old.yearsLeft);
+
+                const d = aTotal - bTotal;
+                const better = d > 0 ? '开到报废再换' : '现在就换';
+
+                sensHTML += `<tr>
+                    <td>${year}</td>
+                    <td class="text-right">${fmtYuan(aTotal)}</td>
+                    <td class="text-right">${fmtYuan(bTotal)}</td>
+                    <td class="text-right ${d > 0 ? 'diff-positive' : 'diff-negative'}">${d > 0 ? '+' : ''}${fmtYuan(d)}</td>
+                    <td class="text-center" style="font-weight:600;color:${d > 0 ? 'var(--color-positive)' : 'var(--color-accent)'}">${better}</td>
+                </tr>`;
+            }
+            sensTbody.innerHTML = sensHTML;
+
+            saveTradeParams();
+        }
+
+        // ========== localStorage 持久化 ==========
+        function saveParams() {
+            const params = {};
+            document.querySelectorAll('#page-calculator input').forEach(input => {
+                params[input.id] = input.value;
+            });
+            localStorage.setItem('carCalculatorParams', JSON.stringify(params));
+        }
+
+        function saveTradeParams() {
+            const params = {};
+            document.querySelectorAll('#page-trade input').forEach(input => {
+                params[input.id] = input.value;
+            });
+            localStorage.setItem('carTradeParams', JSON.stringify(params));
+        }
+
+        function loadParams() {
+            const saved = localStorage.getItem('carCalculatorParams');
+            if (saved) {
+                const params = JSON.parse(saved);
+                Object.entries(params).forEach(([id, val]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                });
+            }
+            const savedTrade = localStorage.getItem('carTradeParams');
+            if (savedTrade) {
+                const params = JSON.parse(savedTrade);
+                Object.entries(params).forEach(([id, val]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                });
+            }
+        }
+
+        // ========== 重置 ==========
+        function resetAll() {
+            if (!confirm('确定要重置所有参数为默认值吗？')) return;
+            localStorage.removeItem('carCalculatorParams');
+            localStorage.removeItem('carTradeParams');
+            location.reload();
+        }
+
+        // ========== 导出数据 ==========
+        function exportData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                calculator: {},
+                trade: {}
+            };
+            document.querySelectorAll('#page-calculator input').forEach(input => {
+                data.calculator[input.id] = input.value;
+            });
+            document.querySelectorAll('#page-trade input').forEach(input => {
+                data.trade[input.id] = input.value;
+            });
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `汽车成本测算_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ========== 初始化 ==========
+        window.addEventListener('DOMContentLoaded', () => {
+            loadParams();
+            calculate();
+            calculateTrade();
+        });
+
+        window.addEventListener('resize', () => {
+            if (document.getElementById('page-calculator').classList.contains('active')) {
+                calculate();
+            }
+        });
+    </script>
+</body>
+</html>
