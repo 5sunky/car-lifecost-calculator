@@ -39,6 +39,318 @@
             --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
             --transition: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
+        /* Dark mode variables - applied when data-theme="dark" or system prefers dark */
+        [data-theme="dark"] {
+            --color-bg: #000000;
+            --color-surface: #1c1c1e;
+            --color-surface-raised: #2c2c2e;
+            --color-border: #38383a;
+            --color-border-light: #2c2c2e;
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #8e8e93;
+            --color-text-tertiary: #636366;
+            --color-text-quaternary: #48484a;
+            --color-accent: #0a84ff;
+            --color-accent-light: rgba(10, 132, 255, 0.15);
+            --color-positive: #30d158;
+            --color-positive-light: rgba(48, 209, 88, 0.15);
+            --color-warning: #ff9f0a;
+            --color-warning-light: rgba(255, 159, 10, 0.15);
+            --color-danger: #ff453a;
+            --color-danger-light: rgba(255, 69, 58, 0.15);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        /* System dark mode preference (only when no manual override) */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --color-bg: #000000;
+                --color-surface: #1c1c1e;
+                --color-surface-raised: #2c2c2e;
+                --color-border: #38383a;
+                --color-border-light: #2c2c2e;
+                --color-text-primary: #ffffff;
+                --color-text-secondary: #8e8e93;
+                --color-text-tertiary: #636366;
+                --color-text-quaternary: #48484a;
+                --color-accent: #0a84ff;
+                --color-accent-light: rgba(10, 132, 255, 0.15);
+                --color-positive: #30d158;
+                --color-positive-light: rgba(48, 209, 88, 0.15);
+                --color-warning: #ff9f0a;
+                --color-warning-light: rgba(255, 159, 10, 0.15);
+                --color-danger: #ff453a;
+                --color-danger-light: rgba(255, 69, 58, 0.15);
+                --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+                --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+                --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+            }
+        }
+
+        /* Dark mode specific overrides */
+        [data-theme="dark"] .param-input {
+                background: #121212;
+                color: #ffffff;
+                border-color: #2c2c2e;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .param-input {
+                background: #121212;
+                color: #ffffff;
+                border-color: #2c2c2e;
+            }
+        }
+
+        [data-theme="dark"] .param-input:focus {
+                background: #1c1c1e;
+                border-color: #0a84ff;
+                box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .param-input:focus {
+                background: #1c1c1e;
+                border-color: #0a84ff;
+                box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+            }
+        }
+
+        [data-theme="dark"] .data-table thead th {
+                background: #161616;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .data-table thead th {
+                background: #161616;
+            }
+        }
+
+        [data-theme="dark"] .data-table tbody tr:hover {
+                background: #1c1c1e;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .data-table tbody tr:hover {
+                background: #1c1c1e;
+            }
+        }
+
+        [data-theme="dark"] .nav-tabs {
+                background: #161616;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .nav-tabs {
+                background: #161616;
+            }
+        }
+
+        [data-theme="dark"] .nav-tab.active {
+                background: #0a0a0a;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .nav-tab.active {
+                background: #0a0a0a;
+            }
+        }
+
+        [data-theme="dark"] .param-note {
+                background: #121212;
+                color: #8e8e93;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .param-note {
+                background: #121212;
+                color: #8e8e93;
+            }
+        }
+
+        [data-theme="dark"] .tooltip-text {
+                background: #3a3a3c;
+                color: #ffffff;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .tooltip-text {
+                background: #3a3a3c;
+                color: #ffffff;
+            }
+        }
+
+        [data-theme="dark"] .tooltip-text::after {
+                border-top-color: #3a3a3c;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .tooltip-text::after {
+                border-top-color: #3a3a3c;
+            }
+        }
+
+        [data-theme="dark"] .header {
+                background: rgba(28, 28, 30, 0.85);
+                border-bottom-color: #38383a;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .header {
+                background: rgba(28, 28, 30, 0.85);
+                border-bottom-color: #38383a;
+            }
+        }
+
+        [data-theme="dark"] .btn {
+                background: #1c1c1e;
+                border-color: #2c2c2e;
+                color: #ffffff;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .btn {
+                background: #1c1c1e;
+                border-color: #2c2c2e;
+                color: #ffffff;
+            }
+        }
+
+        [data-theme="dark"] .btn:hover {
+                background: #2c2c2e;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .btn:hover {
+                background: #2c2c2e;
+            }
+        }
+
+        [data-theme="dark"] .compare-card {
+                background: #161616;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .compare-card {
+                background: #161616;
+            }
+        }
+
+        [data-theme="dark"] .compare-result {
+                background: #161616;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .compare-result {
+                background: #161616;
+            }
+        }
+
+        [data-theme="dark"] .highlight-box {
+                background: rgba(255, 159, 10, 0.08);
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .highlight-box {
+                background: rgba(255, 159, 10, 0.08);
+            }
+        }
+
+        [data-theme="dark"] .highlight-box.warning {
+                background: rgba(255, 69, 58, 0.08);
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .highlight-box.warning {
+                background: rgba(255, 69, 58, 0.08);
+            }
+        }
+
+        [data-theme="dark"] .guide-list > li::before {
+                background: #0a84ff;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .guide-list > li::before {
+                background: #0a84ff;
+            }
+        }
+
+        [data-theme="dark"] .section-number {
+                background: #0a84ff;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .section-number {
+                background: #0a84ff;
+            }
+        }
+
+        [data-theme="dark"] .kpi-card {
+                background: #1c1c1e;
+                border-color: #38383a;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .kpi-card {
+                background: #1c1c1e;
+                border-color: #38383a;
+            }
+        }
+
+        [data-theme="dark"] .param-group {
+                background: #161616;
+                border-color: #2c2c2e;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .param-group {
+                background: #161616;
+                border-color: #2c2c2e;
+            }
+        }
+
+        [data-theme="dark"] .param-group-title {
+                border-bottom-color: #38383a;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .param-group-title {
+                border-bottom-color: #38383a;
+            }
+        }
+
+        [data-theme="dark"] .breakdown-segment::after {
+                color: #8e8e93;
+            }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .breakdown-segment::after {
+                color: #8e8e93;
+            }
+        }
+
+        /* Dark mode toggle button */
+        .theme-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background var(--transition);
+            color: var(--color-text-secondary);
+        }
+        .theme-toggle:hover {
+            background: var(--color-bg);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: var(--font-sans);
@@ -636,7 +948,8 @@
                 <button class="nav-tab" onclick="switchPage('trade')">换购决策</button>
                 <button class="nav-tab" onclick="switchPage('guide')">使用说明</button>
             </nav>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="切换深色/浅色模式">🌙</button>
                 <button class="btn btn-sm" onclick="resetAll()">↺ 重置参数</button>
                 <button class="btn btn-primary btn-sm" onclick="exportData()">↓ 导出数据</button>
             </div>
@@ -906,7 +1219,45 @@
 
 
     <script>
-        // ========== 页面切换 ==========
+        
+        // ========== 主题切换 ==========
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+                updateThemeIcon(saved);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                updateThemeIcon('dark');
+            }
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIcon(next);
+            // Redraw charts with new colors
+            calculate();
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('theme')) {
+                const theme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+                updateThemeIcon(theme);
+                calculate();
+            }
+        });
+
+// ========== 页面切换 ==========
         function switchPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1260,7 +1611,7 @@
             function toY(v) { return padding.top + chartH - (v - minVal) * yScale; }
 
             // 网格线
-            ctx.strokeStyle = '#e5e5e7';
+            ctx.strokeStyle = chartGridColor;
             ctx.lineWidth = 1;
             for (let i = 0; i <= 5; i++) {
                 const y = padding.top + chartH * i / 5;
@@ -1270,14 +1621,14 @@
                 ctx.stroke();
 
                 const val = maxVal - (maxVal - minVal) * i / 5;
-                ctx.fillStyle = '#86868b';
+                ctx.fillStyle = chartLabelColor;
                 ctx.font = '11px sans-serif';
                 ctx.textAlign = 'right';
                 ctx.fillText(Math.round(val).toLocaleString(), padding.left - 10, y + 4);
             }
 
             // X轴标签
-            ctx.fillStyle = '#86868b';
+            ctx.fillStyle = chartLabelColor;
             ctx.font = '11px sans-serif';
             ctx.textAlign = 'center';
             years.forEach((y, i) => {
@@ -1317,18 +1668,26 @@
                 ctx.fillText(label, toX(lastIdx) + 10, toY(data[lastIdx]) + 4);
             }
 
-            drawLine(oilData, '#ff3b30', '油车');
-            drawLine(evData, '#0071e3', '电车');
-            drawLine(hybridData, '#34c759', '混动');
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                          (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            const oilColor = isDark ? '#ff6b6b' : '#ff3b30';
+            const evColor = isDark ? '#5ac8fa' : '#0071e3';
+            const hybridColor = isDark ? '#64e888' : '#34c759';
+            drawLine(oilData, oilColor, '油车');
+            drawLine(evData, evColor, '电车');
+            drawLine(hybridData, hybridColor, '混动');
 
             // 标题
-            ctx.fillStyle = '#1d1d1f';
+            const chartTextColor = isDark ? '#ffffff' : '#1d1d1f';
+            const chartGridColor = isDark ? '#38383a' : '#e5e5e7';
+            const chartLabelColor = isDark ? '#8e8e93' : '#86868b';
+            ctx.fillStyle = chartTextColor;
             ctx.font = '600 14px sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText('年均成本随使用年限变化趋势（元/年）', padding.left, 28);
 
             // 轴标签
-            ctx.fillStyle = '#86868b';
+            ctx.fillStyle = chartLabelColor;
             ctx.font = '12px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('使用年限（年）', width / 2, height - 10);
@@ -1582,6 +1941,7 @@
 
         // ========== 初始化 ==========
         window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
             loadParams();
             calculate();
             calculateTrade();
