@@ -1133,10 +1133,12 @@
                             <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
                             <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-price" value="0" step="0.05" oninput="calculateTrade()"><span class="param-unit">元/度</span></div></div>
                             <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-mileage" value="7500" step="500" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
-                            <div class="param-row"><span class="param-label">年保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-maint-annual" value="1500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-maint-cost" value="1500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-maint-interval" value="10000" step="1000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
                             <div class="param-row"><span class="param-label">年保险费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-insurance" value="3000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
                             <div class="param-row"><span class="param-label">年停车费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-parking" value="3600" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
-                            <div class="param-row"><span class="param-label">轮胎更换成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-tire-cost" value="2800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">单次更换轮胎费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-tire-cost" value="2800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-tire-interval" value="60000" step="5000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
                         </div>
                     </div>
 
@@ -1156,10 +1158,12 @@
                             <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
                             <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-price" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">元/L</span></div></div>
                             <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-mileage" value="15000" step="500" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
-                            <div class="param-row"><span class="param-label">年保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-maint-annual" value="500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-maint-cost" value="500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-maint-interval" value="10000" step="1000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
                             <div class="param-row"><span class="param-label">年保险费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-insurance" value="4500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
                             <div class="param-row"><span class="param-label">年停车费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-parking" value="3600" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
-                            <div class="param-row"><span class="param-label">轮胎更换成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-tire-cost" value="4800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">单次更换轮胎费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-tire-cost" value="4800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-tire-interval" value="40000" step="5000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
                         </div>
                     </div>
 
@@ -1168,7 +1172,21 @@
                         <div class="compare-grid" id="trade-compare"></div>
                     </div>
 
-                    <div class="section-title" style="margin-top:24px;"><span class="section-number">4</span>敏感性：若第 n 年就换车（n ≤ 剩余年限与新车年限的较小值）</div>
+                    
+                    <div class="section-title" style="margin-top:24px;"><span class="section-number">3.5</span>旧车/新车年度使用成本明细</div>
+                    <div class="sensitivity-table" style="margin-bottom:20px;">
+                        <table class="data-table" id="trade-detail-table">
+                            <thead>
+                                <tr>
+                                    <th>项目</th>
+                                    <th class="text-right">现有旧车</th>
+                                    <th class="text-right">换购新车</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trade-detail-tbody"></tbody>
+                        </table>
+                    </div>
+<div class="section-title" style="margin-top:24px;"><span class="section-number">4</span>敏感性：若第 n 年就换车（n ≤ 剩余年限与新车年限的较小值）</div>
                     <div class="sensitivity-table">
                         <table class="data-table" id="trade-sensitivity-table">
                             <thead>
@@ -1581,6 +1599,15 @@
 
             const width = rect.width;
             const height = rect.height;
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                          (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            const chartTextColor = isDark ? '#ffffff' : '#1d1d1f';
+            const chartGridColor = isDark ? '#38383a' : '#e5e5e7';
+            const chartLabelColor = isDark ? '#8e8e93' : '#86868b';
+
+            
+
             const padding = {top: 50, right: 80, bottom: 50, left: 70};
             const chartW = width - padding.left - padding.right;
             const chartH = height - padding.top - padding.bottom;
@@ -1668,8 +1695,6 @@
                 ctx.fillText(label, toX(lastIdx) + 10, toY(data[lastIdx]) + 4);
             }
 
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
-                          (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
             const oilColor = isDark ? '#ff6b6b' : '#ff3b30';
             const evColor = isDark ? '#5ac8fa' : '#0071e3';
             const hybridColor = isDark ? '#64e888' : '#34c759';
@@ -1677,10 +1702,8 @@
             drawLine(evData, evColor, '电车');
             drawLine(hybridData, hybridColor, '混动');
 
+            // 颜色定义（必须在网格线之前）
             // 标题
-            const chartTextColor = isDark ? '#ffffff' : '#1d1d1f';
-            const chartGridColor = isDark ? '#38383a' : '#e5e5e7';
-            const chartLabelColor = isDark ? '#8e8e93' : '#86868b';
             ctx.fillStyle = chartTextColor;
             ctx.font = '600 14px sans-serif';
             ctx.textAlign = 'left';
@@ -1708,10 +1731,12 @@
                 evConsumption: +document.getElementById('old-ev-consumption').value || 0,
                 evPrice: +document.getElementById('old-ev-price').value || 0,
                 mileage: +document.getElementById('old-mileage').value || 0,
-                maintAnnual: +document.getElementById('old-maint-annual').value || 0,
+                maintCost: +document.getElementById('old-maint-cost').value || 0,
+                maintInterval: +document.getElementById('old-maint-interval').value || 1,
                 insurance: +document.getElementById('old-insurance').value || 0,
                 parking: +document.getElementById('old-parking').value || 0,
-                tireCost: +document.getElementById('old-tire-cost').value || 0
+                tireCost: +document.getElementById('old-tire-cost').value || 0,
+                tireInterval: +document.getElementById('old-tire-interval').value || 1
             };
 
             // 新车参数
@@ -1725,10 +1750,12 @@
                 oilConsumption: +document.getElementById('new-oil-consumption').value || 0,
                 oilPrice: +document.getElementById('new-oil-price').value || 0,
                 mileage: +document.getElementById('new-mileage').value || 0,
-                maintAnnual: +document.getElementById('new-maint-annual').value || 0,
+                maintCost: +document.getElementById('new-maint-cost').value || 0,
+                maintInterval: +document.getElementById('new-maint-interval').value || 1,
                 insurance: +document.getElementById('new-insurance').value || 0,
                 parking: +document.getElementById('new-parking').value || 0,
-                tireCost: +document.getElementById('new-tire-cost').value || 0
+                tireCost: +document.getElementById('new-tire-cost').value || 0,
+                tireInterval: +document.getElementById('new-tire-interval').value || 1
             };
 
             const n = old.yearsLeft;
@@ -1739,20 +1766,24 @@
             const oldEnergy = old.mileage * old.evRatio * old.evConsumption / 100 * old.evPrice +
                               old.mileage * (1 - old.evRatio) * old.oilConsumption / 100 * old.oilPrice;
 
-            // 旧车年轮胎费用 =C16/60000*C21 -> mileage / 60000 * tireCost
-            const oldTireAnnual = old.mileage / 60000 * old.tireCost;
+            // 旧车年保养费用 = 年里程 / 保养间隔 × 单次保养费用
+            const oldMaintAnnual = old.mileage / old.maintInterval * old.maintCost;
+            // 旧车年轮胎费用 = 年里程 / 轮胎更换里程 × 单次更换轮胎费用
+            const oldTireAnnual = old.mileage / old.tireInterval * old.tireCost;
 
             // 年行驶成本（能源+保养+保险+停车+轮胎）
-            const oldAnnualCost = oldEnergy + old.maintAnnual + old.insurance + old.parking + oldTireAnnual;
+            const oldAnnualCost = oldEnergy + oldMaintAnnual + old.insurance + old.parking + oldTireAnnual;
 
             // 新车年能源费
             const newEnergy = newCar.mileage * newCar.evRatio * newCar.evConsumption / 100 * newCar.evPrice +
                               newCar.mileage * (1 - newCar.evRatio) * newCar.oilConsumption / 100 * newCar.oilPrice;
 
-            // 新车年轮胎费用 =C33/45000*C38
-            const newTireAnnual = newCar.mileage / 45000 * newCar.tireCost;
+            // 新车年保养费用 = 年里程 / 保养间隔 × 单次保养费用
+            const newMaintAnnual = newCar.mileage / newCar.maintInterval * newCar.maintCost;
+            // 新车年轮胎费用 = 年里程 / 轮胎更换里程 × 单次更换轮胎费用
+            const newTireAnnual = newCar.mileage / newCar.tireInterval * newCar.tireCost;
 
-            const newAnnualCost = newEnergy + newCar.maintAnnual + newCar.insurance + newCar.parking + newTireAnnual;
+            const newAnnualCost = newEnergy + newMaintAnnual + newCar.insurance + newCar.parking + newTireAnnual;
 
             // ===== 方案A：现在就换 =====
             // C47: =$C$25 买新车支出
@@ -1837,7 +1868,21 @@
                 </div>
             `;
 
-            // 敏感性分析
+            
+            // 更新年度成本明细表
+            const detailTbody = document.getElementById('trade-detail-tbody');
+            if (detailTbody) {
+                detailTbody.innerHTML = `
+                    <tr><td>年能源费用</td><td class="text-right">${fmt(oldEnergy)}</td><td class="text-right">${fmt(newEnergy)}</td></tr>
+                    <tr><td>年保养费用</td><td class="text-right">${fmt(oldMaintAnnual)}</td><td class="text-right">${fmt(newMaintAnnual)}</td></tr>
+                    <tr><td>年轮胎费用</td><td class="text-right">${fmt(oldTireAnnual)}</td><td class="text-right">${fmt(newTireAnnual)}</td></tr>
+                    <tr><td>年保险费用</td><td class="text-right">${fmt(old.insurance)}</td><td class="text-right">${fmt(newCar.insurance)}</td></tr>
+                    <tr><td>年停车费用</td><td class="text-right">${fmt(old.parking)}</td><td class="text-right">${fmt(newCar.parking)}</td></tr>
+                    <tr style="font-weight:600;background:var(--color-surface-raised)"><td>年行驶成本小计</td><td class="text-right">${fmt(oldAnnualCost)}</td><td class="text-right">${fmt(newAnnualCost)}</td></tr>
+                `;
+            }
+
+// 敏感性分析
             const sensTbody = document.getElementById('trade-sensitivity-tbody');
             let sensHTML = '';
             const maxN = Math.min(old.yearsLeft, newCar.years);
