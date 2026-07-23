@@ -1923,20 +1923,35 @@
             result.price = target.params.purchase - targetPurchase;
 
             // 2. Mileage adjustment: find mileage where annual cost = baseline
-            // This requires iterating because energy, maint, tire all depend on mileage
+            // Search from current mileage in both directions
+            const currentMileage = target.params.mileage || 0;
             let bestMileage = null;
-            let bestDiff = Infinity;
-            for (let m = 1000; m <= 100000; m += 500) {
-                const testParams = {...target.params, mileage: m};
-                const testResult = calcCarForBE(testParams, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
-                const diff = Math.abs(testResult.annualCost - baseline.cost);
-                if (diff < bestDiff) {
-                    bestDiff = diff;
-                    bestMileage = m;
+
+            // Check if current mileage already achieves the target
+            const currentResult = calcCarForBE({...target.params}, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
+            if (currentResult.annualCost <= baseline.cost) {
+                bestMileage = currentMileage;
+            } else {
+                // Search upward (more mileage = scale effect on fixed costs)
+                for (let m = currentMileage; m <= 100000; m += 500) {
+                    const testParams = {...target.params, mileage: m};
+                    const testResult = calcCarForBE(testParams, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
+                    if (testResult.annualCost <= baseline.cost) {
+                        bestMileage = m;
+                        break;
+                    }
                 }
-                if (testResult.annualCost <= baseline.cost) {
-                    bestMileage = m;
-                    break;
+
+                // If not found upward, search downward (less driving = less variable cost)
+                if (bestMileage === null) {
+                    for (let m = currentMileage; m >= 1000; m -= 500) {
+                        const testParams = {...target.params, mileage: m};
+                        const testResult = calcCarForBE(testParams, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
+                        if (testResult.annualCost <= baseline.cost) {
+                            bestMileage = m;
+                            break;
+                        }
+                    }
                 }
             }
             result.mileage = bestMileage;
@@ -1962,14 +1977,24 @@
 
             // For mileage, determine if we need to increase or decrease
             let actualAction = action;
-            if (unit === 'km/年' && currentValue !== undefined) {
-                actualAction = value > currentValue ? '增到' : '降到';
+            let color = 'var(--color-accent)';
+            if (unit === 'km/年' && currentValue !== undefined && currentValue > 0) {
+                if (value < currentValue) {
+                    actualAction = '降到';
+                    color = 'var(--color-danger)';
+                } else if (value > currentValue) {
+                    actualAction = '增到';
+                    color = 'var(--color-accent)';
+                } else {
+                    actualAction = '保持';
+                    color = 'var(--color-positive)';
+                }
             }
 
             if (actualAction === '降') {
                 return '<span style="color:var(--color-danger);font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
             }
-            return '<span style="color:var(--color-accent);font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
+            return '<span style="color:' + color + ';font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
         }
 
 
@@ -2032,13 +2057,15 @@
             result.price = target.params.purchase - targetPurchase;
 
             // 2. Mileage adjustment
+            // 年成本随里程单调递增，应找"还能打平基准的最大里程"作为阈值
             let bestMileage = null;
             for (let m = 1000; m <= 100000; m += 500) {
                 const testParams = {...target.params, mileage: m};
                 const testResult = calcCarForBE(testParams, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
                 if (testResult.annualCost <= baseline.cost) {
-                    bestMileage = m;
-                    break;
+                    bestMileage = m; // 持续更新，取满足条件的最大里程
+                } else {
+                    break; // 超过阈值后成本只会更高，直接结束
                 }
             }
             result.mileage = bestMileage;
@@ -2064,14 +2091,24 @@
 
             // For mileage, determine if we need to increase or decrease
             let actualAction = action;
-            if (unit === 'km/年' && currentValue !== undefined) {
-                actualAction = value > currentValue ? '增到' : '降到';
+            let color = 'var(--color-accent)';
+            if (unit === 'km/年' && currentValue !== undefined && currentValue > 0) {
+                if (value < currentValue) {
+                    actualAction = '降到';
+                    color = 'var(--color-danger)';
+                } else if (value > currentValue) {
+                    actualAction = '增到';
+                    color = 'var(--color-accent)';
+                } else {
+                    actualAction = '保持';
+                    color = 'var(--color-positive)';
+                }
             }
 
             if (actualAction === '降') {
                 return '<span style="color:var(--color-danger);font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
             }
-            return '<span style="color:var(--color-accent);font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
+            return '<span style="color:' + color + ';font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
         }
 
         function calcCarForBE(params, type) {
