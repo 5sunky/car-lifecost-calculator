@@ -1071,7 +1071,46 @@
                         </table>
                     </div>
                 </div>
-            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">⑤ 成本平衡建议（以当前最低成本车型为基准）</div>
+                        <div class="card-subtitle">电车和混动分别怎么调整，才能打平目前最省的车型</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="params-grid" style="margin-bottom:16px;">
+                        <div class="param-group">
+                            <div class="param-group-title">📊 当前基准</div>
+                            <div class="param-row">
+                                <span class="param-label">当前最省车型</span>
+                                <span id="baseline-car" style="font-weight:600;color:var(--color-accent)">--</span>
+                            </div>
+                            <div class="param-row">
+                                <span class="param-label">当前年均成本</span>
+                                <span id="baseline-cost" style="font-weight:600">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sensitivity-table">
+                        <table class="data-table" id="break-even-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:22%">调整维度</th>
+                                    <th class="text-center" style="width:39%" id="be-header-col1">🚗 油车要怎样调整才能打平电车？</th>
+                                    <th class="text-center" style="width:39%" id="be-header-col2">🔋 混动要怎样调整才能打平电车？</th>
+                                </tr>
+                            </thead>
+                            <tbody id="break-even-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="param-note" style="margin-top:12px;">
+                        <strong>💡 说明：</strong>基于当前填写的全部参数，计算电车和混动分别在「购车价、年里程、使用年限」三个维度上需要怎样调整，才能使其<strong>年均成本</strong>降到和当前最省车型一样。负值表示当前已更优，无需调整。
+                    </div>
+                </div>
+
+            
 
             <div class="card">
                 <div class="card-header"><div class="card-title">③ 使用年限敏感性分析（1–15年，随参数自动重算）</div></div>
@@ -1098,6 +1137,8 @@
                 </div>
             </div>
 
+            
+
             <div class="card">
                 <div class="card-header"><div class="card-title">④ 成本构成（按设定年限）</div></div>
                 <div class="card-body">
@@ -1105,6 +1146,232 @@
                 </div>
             </div>
         </div>
+
+        <!-- ===== 换购决策页 ===== -->
+        <div id="page-trade" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">换购决策 · 现在就换 vs 开到旧车报废再换</div>
+                        <div class="card-subtitle">本页参数全部独立填写、独立计算，与「成本测算对比」表互不影响</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="section-title"><span class="section-number">1</span>现有旧车（黄色单元格 = 可手工修改）</div>
+                    <div class="params-grid" style="margin-bottom:24px;">
+                        <div class="param-group">
+                            <div class="param-group-title">基本信息</div>
+                            <div class="param-row"><span class="param-label">当前残值（现在卖出价）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-residual-now" value="50000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">已使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-years-used" value="4" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">旧车剩余年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-years-left" value="6" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">报废时残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-residual-end" value="10000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                        </div>
+                        <div class="param-group">
+                            <div class="param-group-title">使用成本</div>
+                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-ratio" value="0" min="0" max="100" step="10" oninput="calculateTrade()"><span class="param-unit">(0-100)</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-oil-consumption" value="7" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
+                            <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-oil-price" value="8" step="0.1" oninput="calculateTrade()"><span class="param-unit">元/L</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
+                            <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-price" value="0" step="0.05" oninput="calculateTrade()"><span class="param-unit">元/度</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-mileage" value="7500" step="500" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-maint-cost" value="1500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-maint-interval" value="10000" step="1000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">年保险费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-insurance" value="3000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年停车费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-parking" value="3600" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">单次轮胎费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-tire-cost" value="2800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-tire-interval" value="60000" step="5000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title"><span class="section-number">2</span>换购新车（独立填写，不引用其他表）</div>
+                    <div class="params-grid" style="margin-bottom:24px;">
+                        <div class="param-group">
+                            <div class="param-group-title">基本信息</div>
+                            <div class="param-row"><span class="param-label">新车采购成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-purchase" value="160000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">新车预计使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-years" value="8" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">新车到期残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-residual" value="10000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                        </div>
+                        <div class="param-group">
+                            <div class="param-group-title">使用成本</div>
+                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-ratio" value="100" min="0" max="100" step="10" oninput="calculateTrade()"><span class="param-unit">(0-100)</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-consumption" value="14" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
+                            <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-price" value="0.8" step="0.05" oninput="calculateTrade()"><span class="param-unit">元/度</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
+                            <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-price" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">元/L</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-mileage" value="15000" step="500" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-maint-cost" value="500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-maint-interval" value="10000" step="1000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">年保险费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-insurance" value="4500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年停车费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-parking" value="3600" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">单次轮胎费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-tire-cost" value="4800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-tire-interval" value="40000" step="5000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title"><span class="section-number">3</span>两种策略现金流对比（统一对比到旧车剩余年限末，期末双方各持有一辆新车）</div>
+                    <div id="trade-compare-wrap">
+                        <div class="compare-grid" id="trade-compare"></div>
+                    </div>
+
+                    <div class="section-title" style="margin-top:24px;"><span class="section-number">4</span>敏感性：若第 n 年就换车（n ≤ 剩余年限与新车年限的较小值）</div>
+                    <div class="sensitivity-table">
+                        <table class="data-table" id="trade-sensitivity-table">
+                            <thead>
+                                <tr>
+                                    <th>持有年限 n（年）</th>
+                                    <th class="text-right">方案A净成本</th>
+                                    <th class="text-right">方案B净成本</th>
+                                    <th class="text-right">差额（A−B）</th>
+                                    <th class="text-center">更划算方案</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trade-sensitivity-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="param-note" style="margin-top:12px;">
+                        注：前几年的净成本可能为负，属正常——手里车辆可变现价值高于累计现金支出，比较请直接看「差额」列
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 使用说明页 ===== -->
+        <div id="page-guide" class="page">
+            
+
+            
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">③ 使用年限敏感性分析（1–15年，随参数自动重算）</div></div>
+                <div class="card-body">
+                    <div class="chart-container"><canvas id="sensitivity-chart" class="chart-canvas"></canvas></div>
+                    <div class="sensitivity-table">
+                        <table class="data-table" id="sensitivity-table">
+                            <thead>
+                                <tr>
+                                    <th>使用年限（年）</th>
+                                    <th class="text-right">油车总成本</th>
+                                    <th class="text-right">油车年均</th>
+                                    <th class="text-right">电车总成本</th>
+                                    <th class="text-right">电车年均</th>
+                                    <th class="text-right">混动总成本</th>
+                                    <th class="text-right">混动年均</th>
+                                    <th class="text-center">年均最低车型</th>
+                                    <th class="text-right">差额</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sensitivity-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">④ 成本构成（按设定年限）</div></div>
+                <div class="card-body">
+                    <div class="cost-breakdown" id="cost-breakdown"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 换购决策页 ===== -->
+        <div id="page-trade" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">换购决策 · 现在就换 vs 开到旧车报废再换</div>
+                        <div class="card-subtitle">本页参数全部独立填写、独立计算，与「成本测算对比」表互不影响</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="section-title"><span class="section-number">1</span>现有旧车（黄色单元格 = 可手工修改）</div>
+                    <div class="params-grid" style="margin-bottom:24px;">
+                        <div class="param-group">
+                            <div class="param-group-title">基本信息</div>
+                            <div class="param-row"><span class="param-label">当前残值（现在卖出价）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-residual-now" value="50000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">已使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-years-used" value="4" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">旧车剩余年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-years-left" value="6" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">报废时残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-residual-end" value="10000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                        </div>
+                        <div class="param-group">
+                            <div class="param-group-title">使用成本</div>
+                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-ratio" value="0" min="0" max="100" step="10" oninput="calculateTrade()"><span class="param-unit">(0-100)</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-oil-consumption" value="7" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
+                            <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-oil-price" value="8" step="0.1" oninput="calculateTrade()"><span class="param-unit">元/L</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
+                            <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-ev-price" value="0" step="0.05" oninput="calculateTrade()"><span class="param-unit">元/度</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-mileage" value="7500" step="500" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-maint-cost" value="1500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-maint-interval" value="10000" step="1000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">年保险费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-insurance" value="3000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年停车费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-parking" value="3600" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">单次轮胎费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-tire-cost" value="2800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="old-tire-interval" value="60000" step="5000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title"><span class="section-number">2</span>换购新车（独立填写，不引用其他表）</div>
+                    <div class="params-grid" style="margin-bottom:24px;">
+                        <div class="param-group">
+                            <div class="param-group-title">基本信息</div>
+                            <div class="param-row"><span class="param-label">新车采购成本</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-purchase" value="160000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">新车预计使用年限（年）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-years" value="8" oninput="calculateTrade()"><span class="param-unit">年</span></div></div>
+                            <div class="param-row"><span class="param-label">新车到期残值</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-residual" value="10000" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                        </div>
+                        <div class="param-group">
+                            <div class="param-group-title">使用成本</div>
+                            <div class="param-row"><span class="param-label">用电里程占比</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-ratio" value="100" min="0" max="100" step="10" oninput="calculateTrade()"><span class="param-unit">(0-100)</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里电耗（度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-consumption" value="14" step="0.1" oninput="calculateTrade()"><span class="param-unit">度</span></div></div>
+                            <div class="param-row"><span class="param-label">电价（元/度）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-ev-price" value="0.8" step="0.05" oninput="calculateTrade()"><span class="param-unit">元/度</span></div></div>
+                            <div class="param-row"><span class="param-label">百公里油耗（L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-consumption" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">L</span></div></div>
+                            <div class="param-row"><span class="param-label">油价（元/L）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-oil-price" value="0" step="0.1" oninput="calculateTrade()"><span class="param-unit">元/L</span></div></div>
+                            <div class="param-row"><span class="param-label">年里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-mileage" value="15000" step="500" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">单次保养费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-maint-cost" value="500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">保养间隔里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-maint-interval" value="10000" step="1000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                            <div class="param-row"><span class="param-label">年保险费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-insurance" value="4500" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">年停车费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-parking" value="3600" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">单次轮胎费用</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-tire-cost" value="4800" oninput="calculateTrade()"><span class="param-unit">元</span></div></div>
+                            <div class="param-row"><span class="param-label">轮胎更换里程（km）</span><div class="param-input-wrap"><input type="number" class="param-input" id="new-tire-interval" value="40000" step="5000" oninput="calculateTrade()"><span class="param-unit">km</span></div></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title"><span class="section-number">3</span>两种策略现金流对比（统一对比到旧车剩余年限末，期末双方各持有一辆新车）</div>
+                    <div id="trade-compare-wrap">
+                        <div class="compare-grid" id="trade-compare"></div>
+                    </div>
+
+                    <div class="section-title" style="margin-top:24px;"><span class="section-number">4</span>敏感性：若第 n 年就换车（n ≤ 剩余年限与新车年限的较小值）</div>
+                    <div class="sensitivity-table">
+                        <table class="data-table" id="trade-sensitivity-table">
+                            <thead>
+                                <tr>
+                                    <th>持有年限 n（年）</th>
+                                    <th class="text-right">方案A净成本</th>
+                                    <th class="text-right">方案B净成本</th>
+                                    <th class="text-right">差额（A−B）</th>
+                                    <th class="text-center">更划算方案</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trade-sensitivity-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="param-note" style="margin-top:12px;">
+                        注：前几年的净成本可能为负，属正常——手里车辆可变现价值高于累计现金支出，比较请直接看「差额」列
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 使用说明页 ===== -->
+        <div id="page-guide" class="page">
+            
+
+            
+            </div>
+            
+            
 
         <!-- ===== 换购决策页 ===== -->
         <div id="page-trade" class="page">
@@ -1520,6 +1787,12 @@
             // 绘制敏感性图表
             drawSensitivityChart(oil, ev, hybrid, oilResult, evResult, hybridResult);
 
+            // 计算成本平衡建议
+            calculateBreakEven(oil, ev, hybrid, oilResult, evResult, hybridResult);
+
+            // 计算平衡点
+            calculateBreakEven(oil, ev, hybrid, oilResult, evResult, hybridResult);
+
             // 成本构成
             const breakdown = document.getElementById('cost-breakdown');
             const categories = [
@@ -1588,7 +1861,243 @@
         }
 
         // ========== 绘制敏感性图表 ==========
-        function drawSensitivityChart(oil, ev, hybrid, oilR, evR, hybridR) {
+        
+        // ========== 平衡点分析 ==========
+        function calculateBreakEven(oil, ev, hybrid, oilResult, evResult, hybridResult) {
+            // Determine baseline (lowest annual cost)
+            const costs = [
+                {name: '油车', cost: oilResult.annualCost, params: oil, result: oilResult},
+                {name: '电车', cost: evResult.annualCost, params: ev, result: evResult},
+                {name: '混动', cost: hybridResult.annualCost, params: hybrid, result: hybridResult}
+            ];
+            costs.sort((a, b) => a.cost - b.cost);
+            const baseline = costs[0];
+            const evCar = costs.find(c => c.name === '电车');
+            const hybridCar = costs.find(c => c.name === '混动');
+
+            document.getElementById('baseline-car').textContent = baseline.name;
+            document.getElementById('baseline-cost').textContent = fmt(baseline.cost) + ' 元/年';
+
+            // Determine which two non-baseline cars to compare
+            const nonBaseline = costs.filter(c => c.name !== baseline.name);
+            const col1Car = nonBaseline[0];
+            const col2Car = nonBaseline[1];
+
+            // Update table headers dynamically
+            const col1Header = document.getElementById('be-header-col1');
+            const col2Header = document.getElementById('be-header-col2');
+            if (col1Header) col1Header.innerHTML = (col1Car.name === '油车' ? '🚗 ' : '🔋 ') + col1Car.name + '要怎样调整才能打平' + baseline.name + '？';
+            if (col2Header) col2Header.innerHTML = (col2Car.name === '油车' ? '🚗 ' : '🔋 ') + col2Car.name + '要怎样调整才能打平' + baseline.name + '？';
+
+            // Calculate adjustments for the two non-baseline cars
+            const col1Adjust = calculateAdjustments(col1Car, baseline);
+            const col2Adjust = calculateAdjustments(col2Car, baseline);
+
+            const tbody = document.getElementById('break-even-tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td style="font-weight:600">💰 降低购车价</td>
+                    <td class="text-center">${formatAdjust(col1Adjust.price, '元', '降', '已更优')}</td>
+                    <td class="text-center">${formatAdjust(col2Adjust.price, '元', '降', '已更优')}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600">📍 调整年里程</td>
+                    <td class="text-center">${formatAdjust(col1Adjust.mileage, 'km/年', '增到', '已更优', col1Car.params.mileage)}</td>
+                    <td class="text-center">${formatAdjust(col2Adjust.mileage, 'km/年', '增到', '已更优', col2Car.params.mileage)}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600">⏱️ 延长使用年限</td>
+                    <td class="text-center">${formatAdjust(col1Adjust.years, '年', '用到', '已更优')}</td>
+                    <td class="text-center">${formatAdjust(col2Adjust.years, '年', '用到', '已更优')}</td>
+                </tr>
+            `;
+        }
+
+        function calculateAdjustments(target, baseline) {
+            const result = {price: null, mileage: null, years: null};
+
+            // 1. Price adjustment: solve for purchase price where annual cost = baseline
+            // baselineAnnual = (purchase + runCost * years - residual) / years
+            // => targetPurchase = baselineAnnual * years - runCost * years + residual
+            const targetPurchase = baseline.cost * target.params.years - target.result.runCostAnnual * target.params.years + target.params.residual;
+            result.price = target.params.purchase - targetPurchase;
+
+            // 2. Mileage adjustment: find mileage where annual cost = baseline
+            // This requires iterating because energy, maint, tire all depend on mileage
+            let bestMileage = null;
+            let bestDiff = Infinity;
+            for (let m = 1000; m <= 100000; m += 500) {
+                const testParams = {...target.params, mileage: m};
+                const testResult = calcCarForBE(testParams, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
+                const diff = Math.abs(testResult.annualCost - baseline.cost);
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    bestMileage = m;
+                }
+                if (testResult.annualCost <= baseline.cost) {
+                    bestMileage = m;
+                    break;
+                }
+            }
+            result.mileage = bestMileage;
+
+            // 3. Years adjustment: find years where annual cost = baseline
+            let bestYears = null;
+            for (let y = 1; y <= 30; y++) {
+                const testParams = {...target.params, years: y};
+                const testResult = calcCarForBE(testParams, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
+                if (testResult.annualCost <= baseline.cost) {
+                    bestYears = y;
+                    break;
+                }
+            }
+            result.years = bestYears;
+
+            return result;
+        }
+
+        function formatAdjust(value, unit, action, alreadyBetter, currentValue) {
+            if (value === null || value === undefined) return '<span style="color:var(--color-text-tertiary)">—</span>';
+            if (value <= 0) return '<span style="color:var(--color-positive);font-weight:600">' + alreadyBetter + '</span>';
+
+            // For mileage, determine if we need to increase or decrease
+            let actualAction = action;
+            if (unit === 'km/年' && currentValue !== undefined) {
+                actualAction = value > currentValue ? '增到' : '降到';
+            }
+
+            if (actualAction === '降') {
+                return '<span style="color:var(--color-danger);font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
+            }
+            return '<span style="color:var(--color-accent);font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
+        }
+
+
+        // ========== 成本平衡建议 ==========
+        function calculateBreakEven(oil, ev, hybrid, oilResult, evResult, hybridResult) {
+            // Determine baseline (lowest annual cost)
+            const costs = [
+                {name: '油车', cost: oilResult.annualCost, params: oil, result: oilResult},
+                {name: '电车', cost: evResult.annualCost, params: ev, result: evResult},
+                {name: '混动', cost: hybridResult.annualCost, params: hybrid, result: hybridResult}
+            ];
+            costs.sort((a, b) => a.cost - b.cost);
+            const baseline = costs[0];
+            const evCar = costs.find(c => c.name === '电车');
+            const hybridCar = costs.find(c => c.name === '混动');
+
+            document.getElementById('baseline-car').textContent = baseline.name;
+            document.getElementById('baseline-cost').textContent = fmt(baseline.cost) + ' 元/年';
+
+            // Determine which two non-baseline cars to compare
+            const nonBaseline = costs.filter(c => c.name !== baseline.name);
+            const col1Car = nonBaseline[0];
+            const col2Car = nonBaseline[1];
+
+            // Update table headers dynamically
+            const col1Header = document.getElementById('be-header-col1');
+            const col2Header = document.getElementById('be-header-col2');
+            if (col1Header) col1Header.innerHTML = (col1Car.name === '油车' ? '🚗 ' : '🔋 ') + col1Car.name + '要怎样调整才能打平' + baseline.name + '？';
+            if (col2Header) col2Header.innerHTML = (col2Car.name === '油车' ? '🚗 ' : '🔋 ') + col2Car.name + '要怎样调整才能打平' + baseline.name + '？';
+
+            // Calculate adjustments for the two non-baseline cars
+            const col1Adjust = calculateAdjustments(col1Car, baseline);
+            const col2Adjust = calculateAdjustments(col2Car, baseline);
+
+            const tbody = document.getElementById('break-even-tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td style="font-weight:600">💰 降低购车价</td>
+                    <td class="text-center">${formatAdjust(col1Adjust.price, '元', '降', '已更优')}</td>
+                    <td class="text-center">${formatAdjust(col2Adjust.price, '元', '降', '已更优')}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600">📍 调整年里程</td>
+                    <td class="text-center">${formatAdjust(col1Adjust.mileage, 'km/年', '增到', '已更优', col1Car.params.mileage)}</td>
+                    <td class="text-center">${formatAdjust(col2Adjust.mileage, 'km/年', '增到', '已更优', col2Car.params.mileage)}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:600">⏱️ 延长使用年限</td>
+                    <td class="text-center">${formatAdjust(col1Adjust.years, '年', '用到', '已更优')}</td>
+                    <td class="text-center">${formatAdjust(col2Adjust.years, '年', '用到', '已更优')}</td>
+                </tr>
+            `;
+        }
+
+        function calculateAdjustments(target, baseline) {
+            const result = {price: null, mileage: null, years: null};
+
+            // 1. Price adjustment
+            const targetPurchase = baseline.cost * target.params.years - target.result.runCostAnnual * target.params.years + target.params.residual;
+            result.price = target.params.purchase - targetPurchase;
+
+            // 2. Mileage adjustment
+            let bestMileage = null;
+            for (let m = 1000; m <= 100000; m += 500) {
+                const testParams = {...target.params, mileage: m};
+                const testResult = calcCarForBE(testParams, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
+                if (testResult.annualCost <= baseline.cost) {
+                    bestMileage = m;
+                    break;
+                }
+            }
+            result.mileage = bestMileage;
+
+            // 3. Years adjustment
+            let bestYears = null;
+            for (let y = 1; y <= 30; y++) {
+                const testParams = {...target.params, years: y};
+                const testResult = calcCarForBE(testParams, target.params.evConsumption !== undefined ? 'hybrid' : target.params.consumption ? 'oil' : 'ev');
+                if (testResult.annualCost <= baseline.cost) {
+                    bestYears = y;
+                    break;
+                }
+            }
+            result.years = bestYears;
+
+            return result;
+        }
+
+        function formatAdjust(value, unit, action, alreadyBetter, currentValue) {
+            if (value === null || value === undefined) return '<span style="color:var(--color-text-tertiary)">—</span>';
+            if (value <= 0) return '<span style="color:var(--color-positive);font-weight:600">' + alreadyBetter + '</span>';
+
+            // For mileage, determine if we need to increase or decrease
+            let actualAction = action;
+            if (unit === 'km/年' && currentValue !== undefined) {
+                actualAction = value > currentValue ? '增到' : '降到';
+            }
+
+            if (actualAction === '降') {
+                return '<span style="color:var(--color-danger);font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
+            }
+            return '<span style="color:var(--color-accent);font-weight:600">需' + actualAction + ' ' + fmt(value) + ' ' + unit + '</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">才能打平基准</span>';
+        }
+
+        function calcCarForBE(params, type) {
+            const years = params.years || 10;
+            const mileage = params.mileage || 0;
+
+            let energyAnnual;
+            if (type === 'oil') {
+                energyAnnual = params.consumption * mileage / 100 * params.price;
+            } else if (type === 'ev') {
+                energyAnnual = params.consumption * mileage / 100 * params.price;
+            } else {
+                energyAnnual = mileage * params.evRatio * params.evConsumption / 100 * params.evPrice +
+                               mileage * (1 - params.evRatio) * params.oilConsumption / 100 * params.oilPrice;
+            }
+
+            const maintAnnual = mileage / (params.maintInterval || 1) * (params.maintCost || 0);
+            const tireAnnual = mileage / (params.tireInterval || 1) * (params.tireCost || 0);
+            const parkInsAnnual = (params.parking || 0) + (params.insurance || 0);
+            const runCostAnnual = energyAnnual + maintAnnual + tireAnnual + parkInsAnnual;
+            const totalCost = (params.purchase || 0) + runCostAnnual * years - (params.residual || 0);
+
+            return { annualCost: totalCost / years, runCostAnnual };
+        }
+
+function drawSensitivityChart(oil, ev, hybrid, oilR, evR, hybridR) {
             const canvas = document.getElementById('sensitivity-chart');
             const ctx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
